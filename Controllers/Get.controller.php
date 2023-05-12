@@ -9,26 +9,8 @@
 			// Obtener los datos de la tabla que se envio.
 			$response = GetModel::getData($table);
 
-			if (!empty($response))
-			{
-				$json = array(
-					"status" => 200,
-					"summary" => count($response),
-					"result" => $response
-				);
-
-			} //if (!empty($response))
-			else
-			{
-				$json = array(
-					"status" => 404,					
-					"result" => "Not found"
-				);
-			}
-
-			echo json_encode($json,http_response_code($json["status"]));
-			return;
-
+			$return = new GetController();
+			$return->fncResponse($response,"getData");
 
 		} // public function getData($table)
 
@@ -37,6 +19,23 @@
 		{
 			$response = GetModel::getFilterData($table,$linkTo,$equalTo);
 
+			$return = new GetController();
+			$return->fncResponse($response,"getFilterData");
+
+		}
+
+		// Peticiones GET tablas relacionadas sin filtro.
+		public function getRelData($rel,$type)
+		{
+			$response = GetModel::getRelData($rel,$type);
+
+			$return = new GetController();
+			$return->fncResponse($response,"getRelData");
+		}
+
+		// Respuestas del controlador, cuando realizan los GET a la tabla de datos.
+		public function fncResponse($response,$method)
+		{
 			if (!empty($response))
 			{
 				$json = array(
@@ -50,13 +49,13 @@
 			{
 				$json = array(
 					"status" => 404,					
-					"result" => "Not found"
+					"result" => "Not found",
+					"method" => $method
 				);
 			}
 
 			echo json_encode($json,http_response_code($json["status"]));
-			return;
-
+			return;		
 		}
 
 	} // class GetController

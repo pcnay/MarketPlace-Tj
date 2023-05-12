@@ -68,6 +68,13 @@
 				$response->getFilterData(explode("?",$name_table)[0],$_GET["linkTo"],$_GET["equalTo"]);
 
 			}
+			else if(isset($_GET["rel"]) && isset($_GET["type"]) && explode("?",$name_table)[0] == "relations")
+			{
+				// Peticions GET entre tablas relacionas sin filtro.
+				$response = new GetController();
+				$response->getRelData($_GET["rel"],$_GET["type"]);
+
+			}
 			else
 			{
 				// Peticiones GET Sin Filtro.
