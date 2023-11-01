@@ -45,24 +45,13 @@ GRANT ALL on bd_tienda_virtual.* to 'usuario_tienda'  IDENTIFIED BY 'Tienda_2022
 
 */
 
-USE bd_tienda_virtual;
-
-
-
-CREATE TABLE t_Imagen
-(
-  id_imagen INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,  
-	productoid INT UNSIGNED  NOT NULL,
-	img VARCHAR(100),
-	FOREIGN KEY(productoid) REFERENCES t_Productos(id_producto)
-	ON DELETE RESTRICT ON UPDATE CASCADE
-);
+USE bd_marketplace;
 
 
 /* 
 Cambiar el nombre de un campo. 
 
-ALTER TABLE `t_Personas` CHANGE `toke` `token` VARCHAR(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;
+ALTER TABLE `t_Disputes` CHANGE `id_transmitter_dispute` `id_user_dispute` INT UNSIGNED CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;
 
 */
 

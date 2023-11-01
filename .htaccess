@@ -6,6 +6,6 @@ Options -MultiViews
 # 
 RewriteEngine On
 
-#Todo lo que teng la URL sea interpreatado como una regla
+#Todo lo que tenga la URL sea interpreatado como una regla
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ index.php [QSA,L]

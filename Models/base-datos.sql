@@ -106,7 +106,7 @@ CREATE TABLE t_Subcategories
   id_category_subcategory SMALLINT UNSIGNED NOT NULL,
 	title_category_subcategory TEXT DEFAULT NULL,
 	name_subcategory TEXT DEFAULT NULL,
-	url_category TEXT DEFAULT NULL,
+	url_subcategory TEXT DEFAULT NULL,
 	image_subcategory TEXT DEFAULT NULL,
 	views_subcategory SMALLINT UNSIGNED DEFAULT 0,
 	date_created_subcategory TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -226,15 +226,15 @@ CREATE TABLE t_Disputes
 	id_dispute SMALLINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
 	id_order_dispute INT UNSIGNED NOT NULL,
 	stage_dispute	TEXT DEFAULT NULL,
-	id_transmitter_dispute	INT UNSIGNED NOT NULL,
-	id_receiver_dispute INT UNSIGNED NOT NULL,
+	id_user_dispute	INT UNSIGNED NOT NULL,
+	id_store_dispute INT UNSIGNED NOT NULL,
 	content_dispute	TEXT DEFAULT NULL,
 	answer_dispute TEXT DEFAULT NULL,
 	date_created_dipute	TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	date_update_dipute TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY(id_order_dispute) REFERENCES t_Orders(id_order),
-	FOREIGN KEY(id_transmitter_dispute) REFERENCES t_Users(id_user),
-	FOREIGN KEY(id_receiver_dispute) REFERENCES t_Stores(id_store)
+	FOREIGN KEY(id_user_dispute) REFERENCES t_Users(id_user),
+	FOREIGN KEY(id_store_dispute) REFERENCES t_Stores(id_store)
 );
 
 
@@ -242,15 +242,15 @@ CREATE TABLE t_Messages
 (
 	id_message SMALLINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
 	id_product_message INT UNSIGNED	NOT NULL,
-	id_transmitter_message	INT UNSIGNED NOT NULL,
-	id_receiver_message INT UNSIGNED NOT NULL,
+	id_user_message	INT UNSIGNED NOT NULL,
+	id_store_message INT UNSIGNED NOT NULL,
 	content_message	TEXT DEFAULT NULL, 
 	answer_message TEXT DEFAULT NULL,
 	date_created_message TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	date_updated_message TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY(id_product_message) REFERENCES t_Products(id_product),
-	FOREIGN KEY(id_transmitter_message) REFERENCES t_Users(id_user),
-	FOREIGN KEY(id_receiver_message) REFERENCES t_Stores(id_store)
+	FOREIGN KEY(id_user_message) REFERENCES t_Users(id_user),
+	FOREIGN KEY(id_store_message) REFERENCES t_Stores(id_store)
 );
 
 CREATE TABLE t_Sales
