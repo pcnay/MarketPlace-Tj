@@ -104,7 +104,7 @@ CREATE TABLE t_Subcategories
 (
   id_subcategory SMALLINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
   id_category_subcategory SMALLINT UNSIGNED NOT NULL,
-	title_category_subcategory TEXT DEFAULT NULL,
+	title_list_subcategory TEXT DEFAULT NULL,
 	name_subcategory TEXT DEFAULT NULL,
 	url_subcategory TEXT DEFAULT NULL,
 	image_subcategory TEXT DEFAULT NULL,

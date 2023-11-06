@@ -75,7 +75,7 @@ else
 			"status" => 200, 	
 			"result" => "GET" 	
 		); 
-		// Para mandar una respuesta a la respuesta 
+		// Para mandar una respuesta a la 
 		echo json_encode($json,http_response_code($json["status"]));
 
 		return; 	
@@ -101,8 +101,19 @@ else
 			return; 	
 			*/
 
+			if ((isset($_GET["orderBy"])) && isset($_GET["orderMode"]))
+			{
+				$orderBy = $_GET["orderBy"];
+				$orderMode = $_GET["orderMode"];				
+			}
+			else
+			{
+				$orderBy = null;
+				$orderMode = null;				
+			}
+
 			$response = new GetController();
-			$response->getFilterData(explode("?",$routesArray[3])[0],$_GET["linkTo"],$_GET["equalTo"]);
+			$response->getFilterData(explode("?",$routesArray[3])[0],$_GET["linkTo"],$_GET["equalTo"],$orderBy,$orderMode);
 		}
 		else if (isset($_GET["rel"]) && isset($_GET["type"]) && explode("?",$routesArray[3])[0] == "relations" && (!isset($_GET["rel"])) && (!isset($_GET["type"])))
 		{
@@ -110,35 +121,83 @@ else
 			// Peticiones GET entre Tablas relacionadas sin Filtros
 			// =======================================================	
 
+			if ((isset($_GET["orderBy"])) && isset($_GET["orderMode"]))
+			{
+				$orderBy = $_GET["orderBy"];
+				$orderMode = $_GET["orderMode"];				
+			}
+			else
+			{
+				$orderBy = null;
+				$orderMode = null;				
+			}
+
 			// Se envia una solicitud al Controlador.
 			$response = new GetController();
 			//$response->getRelData(explode("?",$routesArray[3])[0],$_GET["rel"],$_GET["type"]);
-			$response->getRelData($_GET["rel"],$_GET["type"]);
+			$response->getRelData($_GET["rel"],$_GET["type"],$orderBy,$orderMode);
 
 		} // else if (isset($_GET["linkTo"]) && isset($_GET["equalTo"]))
 
 		else if (isset($_GET["rel"]) && isset($_GET["type"]) && explode("?",$routesArray[3])[0] == "relations" && isset($_GET["linkTo"]) && isset($_GET["equalTo"]))
 		{
-	
 			// =======================================================
 			// Peticiones GET entre Tablas relacionadas CON Filtros
 			// =======================================================	
+			if ((isset($_GET["orderBy"])) && isset($_GET["orderMode"]))
+			{
+				$orderBy = $_GET["orderBy"];
+				$orderMode = $_GET["orderMode"];				
+			}
+			else
+			{
+				$orderBy = null;
+				$orderMode = null;				
+			}
+
 			// Se envia una solicitud al Controlador.
 			$response = new GetController();
 			//$response->getRelData(explode("?",$routesArray[3])[0],$_GET["rel"],$_GET["type"]);
-			$response->getRelFilterData($_GET["rel"],$_GET["type"],$_GET["linkTo"],$_GET["equalTo"]);
+			$response->getRelFilterData($_GET["rel"],$_GET["type"],$_GET["linkTo"],$_GET["equalTo"],$orderBy,$orderMode);
+		}		
+			// =======================================================
+			// Peticiones GET para buscar 
+			// =======================================================	
+		else if((isset($_GET["linkTo"])) && (isset($_GET["search"])))
+		{ 
+			if ((isset($_GET["orderBy"])) && isset($_GET["orderMode"]))
+			{
+				$orderBy = $_GET["orderBy"];
+				$orderMode = $_GET["orderMode"];				
+			}
+			else
+			{
+				$orderBy = null;
+				$orderMode = null;				
+			}
+
+			$response = new GetController();
+			$response->getSearchData(explode("?",$routesArray[3])[0],$_GET["linkTo"],$_GET["search"],$orderBy,$orderMode);
 		}
-		else
+		else // Peticiones GET sin Filtro
 		{
 			// ======================================================================
-			// Peticiones GET Sin Filtros
+			// Peticiones GET Sin Filtros, una tabla
 			// ======================================================================
+			if ((isset($_GET["orderBy"])) && isset($_GET["orderMode"]))
+			{
+				$orderBy = $_GET["orderBy"];
+				$orderMode = $_GET["orderMode"];				
+			}
+			else
+			{
+				$orderBy = null;
+				$orderMode = null;				
+			}
 			$response = new GetController();
-			$response->getData($routesArray[3]);
-
+			// explode("?",$routesArray[3])[0] = Para extraer el nombre de la tabla.
+			$response->getData(explode("?",$routesArray[3])[0],$orderBy,$orderMode);
 		}
-
-
 	} // if ((count($routesArray) > 1) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER
 
 	
@@ -191,158 +250,3 @@ else
 	} // if ((count($routesArray) > 1) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER
 
 } // if (count($name_table)==0)
-
-
-
-/*
-echo '<pre>';
-	print_r($routesArray);
-echo '</pre>';
-return;
-*/
-
-
-
-/*
-
-// REQUEST_URI = Para extraerlas palabras despues del nombre de dominio
-	// HTTP_HOST = Extraer el nombre del dominio
-	
-	// Usando comandos de PHP para convertir la cadena en un arreglo y poder extraer lo que se requiere
-	$routesArray = explode("/",$_SERVER['REQUEST_URI']);
-
-	/*
-		[0]] => 
-    [1] => curso-web
-    [2] => MarketPlace
-    [3] => Categorias
-	
-	$routesArray = (array_filter($routesArray));
-	//$routesArray = $routesArray[3];
-
-	// Para extraer palabra despues del dominio. "curso-web/MarketPlace/Categorias"
-	$name_table = $routesArray[3];
-	
-	/*
-	echo '<pre>';
-	print_r($routesArray2);
-	echo '</pre>';
-	return;
-	
-
-
-	if (count($routesArray) == 0)
-	{
-		$json = array(
-			"status" => 404,
-			"result" =>"Not Found"
-		);
-		echo json_encode($json,http_response_code($json["status"]));
-		return;
-	}
-	else
-	{
-		// Peticiones GET
-		// Esta seccion es para analizar la URL para la peticion HTTPS
-		// REQUEST_METHOD = Metodo de requerimiento : GET,POST, DELETE, POST 
-		if ((count($routesArray) > 1) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER["REQUEST_METHOD"]=="GET"))
-		{
-			// Desplegando la ruta despues del Dominio en la URL
-			/*
-			$json = array(
-				"status" => 200,
-				"result" => "GET"
-			);
-
-			// Para mandar una respuesta a la respuesta 
-			echo json_encode($json,http_response_code($json["status"]));
-			return;
-			
-			
-
-				// Peticiones GET entre tablas relaciona con filtro
-				// relations = Palabra clave para indicar que es una relacion
-				// rel = Cuales tablas se van relacionar.
-				// type = son los id con el que se relacionan las tablas
-				//https://www.miportalweb.org/curso-web/MarketPlace/relations?rel=t_Categories,t_Products&type=product,category
-
-			else if(isset($_GET["rel"]) && isset($_GET["type"]) && explode("?",$name_table)[0] == "relations")
-			{
-				// Peticions GET entre tablas relacionas sin filtro.
-				$response = new GetController();
-				$response->getRelData($_GET["rel"],$_GET["type"]);
-
-				
-			}
-
-			else if(isset($_GET["rel"]) && isset($_GET["type"]) && explode("?",$name_table)[0] == "relations" && isset($_GET["linkTo"]) && isset($_GET["equalTo"]) ) 
-			{
-				$response = new GetController();
-				$response->getRelFilterData($_GET["rel"],$_GET["type"],$_GET["linkTo"],$_GET["equalTo"]);
-
-			}
-			else
-			{
-				// Peticiones GET Sin Filtro.
-				$response = new GetController();
-				$response->getData($name_table);
-			}
-
-		} // ["REQUEST_METHOD"]=="GET"))
-
-
-		// Peticiones POST
-		// REQUEST_METHOD = Metodo de requerimiento : GET,POST, DELETE, POST 
-		if ((count($routesArray) > 1) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER["REQUEST_METHOD"]=="POST"))
-		{
-			/*
-			// Desplegando la ruta despues del Dominio en la URL
-			$json = array(
-				"status" => 200,
-				"result" => "POST"
-			);
-			echo json_encode($json,http_response_code($json["status"]));
-			return;
-			
-
-		} // ["REQUEST_METHOD"]=="POST"))
-
-		// Peticiones PUT
-		// REQUEST_METHOD = Metodo de requerimiento : GET,POST, DELETE, POST 
-		if ((count($routesArray) > 1) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER["REQUEST_METHOD"]=="PUT"))
-		{
-			// Desplegando la ruta despues del Dominio en la URL
-			/*
-			$json = array(
-				"status" => 200,
-				"result" => "PUT"
-			);
-			echo json_encode($json,http_response_code($json["status"]));
-			return;
-			
-		} // ["REQUEST_METHOD"]=="POST"))
-
-		// Peticiones DELETE
-		// REQUEST_METHOD = Metodo de requerimiento : GET,POST, DELETE, POST 
-		if ((count($routesArray) > 1) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER["REQUEST_METHOD"]=="DELETE"))
-		{
-			// Desplegando la ruta despues del Dominio en la URL
-			/*
-			$json = array(
-				"status" => 200,
-				"result" => "DELETE"
-			);
-			echo json_encode($json,http_response_code($json["status"]));
-			return;
-			
-		} // ["REQUEST_METHOD"]=="POST"))
-
-	} // else if (count($routesArray) == 0)
-
-?>
-*/
-
-?> 
-
-
-
