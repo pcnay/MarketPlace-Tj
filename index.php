@@ -9,9 +9,17 @@
 	header('content-type: application/json; charset=utf-8');
 	
 	require_once "Controllers/Route.controller.php";
+	
 	require_once "Controllers/Get.controller.php";
+	require_once "Controllers/Post.controller.php";
+	require_once "Controllers/Put.controller.php";
+	require_once "Controllers/Delete.controller.php";
+
 	require_once "Models/Get.model.php";
-		
+	require_once "Models/Post.model.php";		
+	require_once "Models/Put.model.php";
+	require_once "Models/Delete.model.php";
+
 	$index = new RoutesController();
 	$index->index();
 

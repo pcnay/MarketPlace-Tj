@@ -45,6 +45,7 @@ $routesArray = (array_filter($routesArray));
 // Cambiar este valor ya que actualmente se esta usando : "curso-web/MarketPlace"
 if (count($routesArray)==2)
 {
+	/*
 	$json = array( 
 		"status" => 400, 	
 		"result" =>"Not Found" 	
@@ -54,6 +55,13 @@ if (count($routesArray)==2)
 	echo json_encode($json,http_response_code($json["status"]));
 
 	return; 	
+	*/
+	// Solicitar respuesta del Controlador para crear datos desde cualquier Tabla.
+	if (isset($_POST))
+	{
+		$response = new PostController();
+
+	}
 }
 else
 {
@@ -67,7 +75,7 @@ else
 	
 	// Peticion "GET"	
 	// if ((count($routesArray) == 3) && (isset($_SERV
-	// Cambiar el valor de == 3 cuando modifique la ruta: ....curso-web/MarketPlace/Productos
+	// Cambiar el valor de == 3  (nombre tabla) cuando modifique la ruta: ....curso-web/MarketPlace/Productos
 	if ((count($routesArray) === 3) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER["REQUEST_METHOD"]=="GET"))
 	{
 		/*
@@ -112,8 +120,20 @@ else
 				$orderMode = null;				
 			}
 
+			// Si vienen las variables Globales para los limites.
+			if ((isset($_GET["startAt"])) && isset($_GET["endAt"]))
+			{
+				$startAt = $_GET["startAt"];
+				$endAT = $_GET["endAt"];
+			}
+			else
+			{
+				$startAT = null;
+				$endAt = null;				
+			}
+
 			$response = new GetController();
-			$response->getFilterData(explode("?",$routesArray[3])[0],$_GET["linkTo"],$_GET["equalTo"],$orderBy,$orderMode);
+			$response->getFilterData(explode("?",$routesArray[3])[0],$_GET["linkTo"],$_GET["equalTo"],$orderBy,$orderMode,$startAt,$endAt);
 		}
 		else if (isset($_GET["rel"]) && isset($_GET["type"]) && explode("?",$routesArray[3])[0] == "relations" && (!isset($_GET["rel"])) && (!isset($_GET["type"])))
 		{
@@ -132,10 +152,22 @@ else
 				$orderMode = null;				
 			}
 
+			// Si vienen las variables Globales para los limites.
+			if ((isset($_GET["startAt"])) && isset($_GET["endAt"]))
+			{
+				$startAt = $_GET["startAt"];
+				$endAT = $_GET["endAt"];
+			}
+			else
+			{
+				$startAT = null;
+				$endAt = null;				
+			}
+
 			// Se envia una solicitud al Controlador.
 			$response = new GetController();
 			//$response->getRelData(explode("?",$routesArray[3])[0],$_GET["rel"],$_GET["type"]);
-			$response->getRelData($_GET["rel"],$_GET["type"],$orderBy,$orderMode);
+			$response->getRelData($_GET["rel"],$_GET["type"],$orderBy,$orderMode,$startAt,$endAt);
 
 		} // else if (isset($_GET["linkTo"]) && isset($_GET["equalTo"]))
 
@@ -155,10 +187,22 @@ else
 				$orderMode = null;				
 			}
 
+			// Si vienen las variables Globales para los limites.
+			if ((isset($_GET["startAt"])) && isset($_GET["endAt"]))
+			{
+				$startAt = $_GET["startAt"];
+				$endAT = $_GET["endAt"];
+			}
+			else
+			{
+				$startAT = null;
+				$endAt = null;				
+			}
+
 			// Se envia una solicitud al Controlador.
 			$response = new GetController();
 			//$response->getRelData(explode("?",$routesArray[3])[0],$_GET["rel"],$_GET["type"]);
-			$response->getRelFilterData($_GET["rel"],$_GET["type"],$_GET["linkTo"],$_GET["equalTo"],$orderBy,$orderMode);
+			$response->getRelFilterData($_GET["rel"],$_GET["type"],$_GET["linkTo"],$_GET["equalTo"],$orderBy,$orderMode,$startAt,$endAt);
 		}		
 			// =======================================================
 			// Peticiones GET para buscar 
@@ -176,8 +220,20 @@ else
 				$orderMode = null;				
 			}
 
+			// Si vienen las variables Globales para los limites.
+			if ((isset($_GET["startAt"])) && isset($_GET["endAt"]))
+			{
+				$startAt = $_GET["startAt"];
+				$endAT = $_GET["endAt"];
+			}
+			else
+			{
+				$startAT = null;
+				$endAt = null;				
+			}
+			
 			$response = new GetController();
-			$response->getSearchData(explode("?",$routesArray[3])[0],$_GET["linkTo"],$_GET["search"],$orderBy,$orderMode);
+			$response->getSearchData(explode("?",$routesArray[3])[0],$_GET["linkTo"],$_GET["search"],$orderBy,$orderMode,$startAt,$endAt);
 		}
 		else // Peticiones GET sin Filtro
 		{
@@ -194,9 +250,22 @@ else
 				$orderBy = null;
 				$orderMode = null;				
 			}
+
+			// Se verifica si vienen variables de Limite
+			if ((isset($_GET["startAt"])) && isset($_GET["endAt"]))
+			{
+				$startAt = $_GET["startAt"];
+				$endAt = $_GET["endAt"];				
+			}
+			else
+			{
+				$startAt = null;
+				$endAt = null;				
+			}
+
 			$response = new GetController();
 			// explode("?",$routesArray[3])[0] = Para extraer el nombre de la tabla.
-			$response->getData(explode("?",$routesArray[3])[0],$orderBy,$orderMode);
+			$response->getData(explode("?",$routesArray[3])[0],$orderBy,$orderMode,$startAt,$endAt);
 		}
 	} // if ((count($routesArray) > 1) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER
 
@@ -204,49 +273,282 @@ else
 	// ==========================================================================
 	// Peticion "POST"	
 	// ==========================================================================
-	if ((count($routesArray) == 1) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER["REQUEST_METHOD"]=="POST"))
+
+	// if ((count($routesArray) == 3) && (isset($_SERV
+	// Cambiar el valor de == 3 (nombre tabla) cuando modifique la ruta: ....curso-web/MarketPlace/Productos
+
+	if ((count($routesArray) == 3) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER["REQUEST_METHOD"]=="POST"))
 	{
+		/*
 		$json = array( 
 			"status" => 200, 	
-			"result" => "POST" 	
+			"result" => "POST" //$_POST
 		); 
 		// Para mandar una respuesta a la respuesta 
 		echo json_encode($json,http_response_code($json["status"]));
 
 		return; 	
+		*/
+
+		// Antes de grabar los datos en la tabla, se debe validar el nombre y numero de columnas de la tabla.
+		// Obteniendo el nombre de la base de datos.
+		$database = RoutesController::database();
+		$response = PostController::getColumnsData(explode("?",$routesArray[3])[0],$database);
+		$columns = array(); // Para guardar los nombres de columnas.
+
+		// Mostrando el contenido de la variable "$reponse", que contiene los campos de la tabla desde la Base de datos
+		foreach ($response as $key => $value)
+		{
+			//echo '<pre>';
+			//print_r ($value->item);
+			array_push($columns,$value->item);
+			//echo '</pre>';	
+		}
+			array_shift($columns); // Eliminando el primer elemento "id_XXXXX"
+			array_pop($columns); // Elimina el ultimo elemento
+
+			//echo '<pre>';
+			//print_r ($columns);
+			//echo '</pre>';	
+			//return;
+
+		if (isset($_POST))
+		{
+			// Que valores retorna la variable super global de $_POST.
+			//echo '<pre>';
+			//print_r ($_POST);
+			//echo '</pre>';		
+
+			// Validar que los nombres de las columnas de la tabal coincidan con los campos POST(que se envian desde el formulario)
+			// Recorriendo el arreglo de "columns"
+			$count = 0;
+			foreach ($columns as $key => $value)
+			{
+				// Para que despliegue solo los nombres de los campos
+				//echo '<pre>';
+				//print_r (array_keys($_POST)[$key]); 
+				//echo '</pre>';		
+
+				if (array_keys($_POST)[$key] == $value)
+				{
+					$count++; // coinciden el numero de columnas de la variable $_POST(formulario) con las campos de la Base de Datos.					
+				}
+			} //foreach ($columns as $key => $value) 
+
+			//return;
+			
+			if ($count == count($columns))
+			{
+				//echo "Coincide";
+			
+				// Solicitamos respuesta del Controlador para crear datos en cualquer tabla/
+				$response = new PostController();
+				$response->postData(explode("?",$routesArray[3])[0],$_POST);
+			}
+			else
+			{
+				$json = array('status' => 400,'result' => "Error: Fields in the form do not match the datatable");
+
+				echo json_encode($json,http_response_code($json["status"]));
+				return;
+			}
+			
+		} //if (isset($_POST))
 
 	} // if ((count($routesArray) > 1) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER
 
 	// ==========================================================================
 	// Peticion "PUT"	
+	// Cambiar el valor de == 3  (nombre tabla) cuando modifique la ruta: ....curso-web/MarketPlace/Productos
 	// ==========================================================================
-	if ((count($routesArray) == 1) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER["REQUEST_METHOD"]=="PUT"))
+	if ((count($routesArray) == 3) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER["REQUEST_METHOD"]=="PUT"))
 	{
+		/*		
 		$json = array( 
 			"status" => 200, 	
 			"result" => "PUT" 	
 		); 
 		// Para mandar una respuesta a la respuesta 
 		echo json_encode($json,http_response_code($json["status"]));
+		*/
 
-		return; 	
+		// Validar que existe el ID en la tabla, que se desea Actualizar.
+		
+		// Validar si existe el "Id"
+		if ((isset($_GET["id"])) && (isset($_GET["nameId"])))
+		{
+			$table = explode("?",$routesArray[3])[0];
+			$linkTo = $_GET["nameId"];
+			$equalTo = $_GET["id"];
+			$orderBy = null;
+			$orderMode = null;
+			$startAt = null;
+			$endAt = null;
+				
+			$response = PutController::getFilterData($table,$linkTo,$equalTo,$orderBy,$orderMode,$startAt,$endAt);
+	
+			/*
+			// Muestrando el contenido de la variable "$response"
+			echo '<pre>';
+			print_r ($response);
+			echo '</pre>';
+			return;
+			*/
+			
+			if ($response)
+			{
+				// Capturar los datos del formulario.
+				$data = array();
+				 			
+				parse_str(file_get_contents('php://input'),$data);
+		
+				/*
+				// Muestrando el contenido de la variable "$data"
+				echo '<pre>';
+				//print_r ($data);
+				print_r(array_keys($data));
+				echo '</pre>';
+				return;
+				*/
 
+				/* 
+				$json = array( 
+					"status" => 200, 	
+					"result" => $data 	
+				); 
+				// Para mandar una respuesta a la respuesta 
+				echo json_encode($json,http_response_code($json["status"]));	
+				*/
+
+				// Obtener los listados de Columnas, la tabla a cambiar.
+				// Se debe validar el nombre y numero de columnas de la tabla.
+				// Obteniendo el nombre de la base de datos.
+				$database = RoutesController::database();
+				$response = PostController::getColumnsData(explode("?",$routesArray[3])[0],$database);
+				$columns = array(); // Para guardar los nombres de columnas.
+
+				// Mostrando el contenido de la variable "$reponse", que contiene los campos de la tabla desde la Base de datos
+				foreach ($response as $key => $value)
+				{
+					//echo '<pre>';
+					//print_r ($value->item);
+					array_push($columns,$value->item);
+					//echo '</pre>';	
+				}
+
+				array_shift($columns); // Quita el primer elememto
+				// Para quitar los dos ultimos renglones, del arreglo
+				array_pop($columns);	// Quita el ultimo elemento
+				array_pop($columns);	// Quita el ultimo elemento
+
+				/*
+				// Mostrando las columnas
+				echo '<pre>';
+				print_r($columns);
+				echo '</pre>';
+				//return;
+				*/
+
+				// Se valida que los campos de la variable Global PUT coincidan con los campos de la tabala en curso.
+				// Mostrando en contenido de las llaves
+				
+				$count = 0;
+				foreach (array_keys($data) as $key => $value)
+				{
+					// Busca el valor de "$value" en el arreglo "$columns"
+					$count = array_search($value,$columns);
+					/*
+					echo '<pre>';
+					print_r($value);
+					echo "</br>";
+					echo '</pre>';
+					*/
+				}		
+					/*
+					echo '<pre>';
+					print_r($count);
+					echo '</pre>';					
+					return;
+					*/
+
+					// Si una columna no coincide el valor sera 0.					
+					if ($count >0)
+					{
+						// Respuesta del controaldor para editar cualquier tabla.
+						$response = new PutController();
+						$response->putData(explode("?",$routesArray[3])[0],$data,$_GET["id"],$_GET["nameId"]);		
+					}
+					else
+					{
+						$json = array('status' => 400,
+						'results' => 'Error Fields in the form do not match the Database');
+						echo json_encode($json,http_response_code($json["status"]));
+						return;		
+					}
+			}
+			else
+			{
+				$json = array('status' => 400,
+				'results' => 'Error The ID is not found in the DataBase');
+				echo json_encode($json,http_response_code($json["status"]));
+				return;
+			} // if ($response)
+			
+		} // 		if ((isset($_GET["id"])) && (isset($_GET["nameId"])))
+
+		return;
+		
 	} // if ((count($routesArray) > 1) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER
 
 	// ==========================================================================
 	// Peticion "DELETE"	
+	// Cambiar el valor de == 3  (nombre tabla) cuando modifique la ruta: ....curso-web/MarketPlace/Productos
 	// ==========================================================================
-	if ((count($routesArray) == 1) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER["REQUEST_METHOD"]=="DELETE"))
+	if ((count($routesArray) == 3) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER["REQUEST_METHOD"]=="DELETE"))
 	{
-		$json = array( 
-			"status" => 200, 	
-			"result" => "DELETE" 	
-		); 
-		// Para mandar una respuesta a la respuesta 
-		echo json_encode($json,http_response_code($json["status"]));
+		// Se verifica si viene un ID.
+		if (isset($_GET["id"]) && isset($_GET["nameId"]))
+		{
+			$table = explode("?",$routesArray[3])[0];
+			$linkTo = $_GET["nameId"];
+			$equalTo = $_GET["id"];
+			$orderBy = null;
+			$orderMode = null;
+			$startAt = null;
+			$endAt = null;
+				
+			$response = PutController::getFilterData($table,$linkTo,$equalTo,$orderBy,$orderMode,$startAt,$endAt);
 
-		return; 	
+			if ($response)
+			{
+				/*
+				$json = array( 
+					"status" => 200, 	
+					"result" => "DELETE" 	
+				); 
+				// Para mandar una respuesta a la respuesta 
+				echo json_encode($json,http_response_code($json["status"]));
+				return; 		
+				*/
+
+				// Solicitamos respuesta del controlador.
+				$response_delete = new DeleteController();
+				$response_delete->deleteData(explode("?",$routesArray[3])[0],$_GET["id"],$_GET["nameId"]);
+
+			}
+			else
+			{
+				$json = array('status' => 400,
+				'results' => 'Error The ID is not found in the DataBase');
+				echo json_encode($json,http_response_code($json["status"]));
+				return;		
+			} // if ($response)
+
+		} //if (isset($_GET["id"]) && isset($_GET["nameId"]))
+
+
+		
 
 	} // if ((count($routesArray) > 1) && (isset($_SERVER["REQUEST_METHOD"])) && ($_SERVER
 
-} // if (count($name_table)==0)
+} // if (count($routesArray)==2)

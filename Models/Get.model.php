@@ -20,7 +20,7 @@
 		//$reponse = new GetController();
 		//$response->getData()
 
-		static public function getData($table,$orderBy,$orderMode)
+		static public function getData($table,$orderBy,$orderMode,$startAt,$endAt)
 		{
 			// Para mostrar que valor tiene la variable $table
 			/*
@@ -32,9 +32,15 @@
 
 			//https://www.miportalweb.org/curso-web/MarketPlace/t_Categories?orderBy=name_category&orderMode=ASC
 
-			if (($orderBy != null) && ($orderMode != null))
+			if (($orderBy != null) && ($orderMode != null) && ($startAt == null) && ($endAt == null))
 			{
 				$stmt = Connection::connect()->prepare("SELECT * FROM $table ORDER BY $orderBy $orderMode ");
+			}
+			else if (($orderBy != null) && ($orderMode != null) && ($startAt != null) && ($endAt != null))						
+			{
+				//https://www.miportalweb.org/curso-web/MarketPlace/t_Categories?orderBy=id_category&orderMode=ASC&startAt=3&endAt=7
+
+					$stmt = Connection::connect()->prepare("SELECT * FROM $table ORDER BY $orderBy $orderMode LIMIT $startAt, $endAt");	
 			}
 			else
 			{
@@ -55,15 +61,19 @@
 		// =============================================================================
 		// Peticion Get con Filtro
 		// ============================================================================
-		static public function getFilterData($table,$linkTo,$equalTo,$orderBy,$orderMode)
+		static public function getFilterData($table,$linkTo,$equalTo,$orderBy,$orderMode,$startAt,$endAt)
 		{
-			if (($orderBy != null) && ($orderMode != null))
+			if (($orderBy != null) && ($orderMode != null) && ($startAt == null) && ($endAt == null))
 			{
 				$stmt = Connection::connect()->prepare("SELECT * FROM $table WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode");
 			}
+			else if(($orderBy != null) && ($orderMode != null) && ($startAt != null) && ($endAt != null))
+			{
+				$stmt = Connection::connect()->prepare("SELECT * FROM $table WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode LIMIT $startAt,$endAt");
+			}
 			else
 			{
-				$stmt = Connection::connect()->prepare("SELECT * FROM $table WHERE $linkTo = :$linkTo ");
+				$stmt = Connection::connect()->prepare("SELECT * FROM $table WHERE $linkTo = :$linkTo");
 			}
 
 			// bindParam = Envia los parametros ocultos.
@@ -84,7 +94,7 @@
 		// Peticiones GET tablas relacionadas sin filtro		
 		// Se debe colocar la Tabla Hijo, y despues la tabla Padre
 		// ==============================================================
-		static public function getRelData($rel,$type,$orderBy,$orderMode)
+		static public function getRelData($rel,$type,$orderBy,$orderMode,$startAt,$endAt)
 		{
 			//https://www.miportalweb.org/curso-web/MarketPlace/relations?rel=t_Categories,t_Products&type=category,product
 			
@@ -118,13 +128,17 @@
 				$On1 = $relArray[0].".id_".$typeArray[1]."_".$typeArray[0];
 				$On2 = $relArray[1].".id_".$typeArray[1];
 
-				if (($orderBy != null) && ($orderMode != null))
+				if (($orderBy != null) && ($orderMode != null) && ($startAt == null) && ($endAt == null))
 				{
 					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1 = $On2 ORDER BY $orderBy $orderMode");				
 				}
+				else if (($orderBy != null) && ($orderMode != null) && ($startAt != null) && ($endAt != null))
+				{
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1 = $On2 ORDER BY $orderBy $orderMode LIMIT $startAt,$endAt");				
+				}
 				else
 				{
-					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1 = $On2");				
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1 = $On2");	
 				}
 
 			} //if (count($relArray) == 2 && count($typeArray) == 2)
@@ -154,16 +168,24 @@
 				$On2A = $relArray[0].".id_".$typeArray[2]."_".$typeArray[0];	//"t_Products.id_subcategory_product";
 				$On2B = $relArray[2].".id_".$typeArray[2]; 	//"t_Subcategories.id_subcategory";
 
-				if (($orderBy != null) && ($orderMode != null))
+				if (($orderBy != null) && ($orderMode != null) && ($startAt == null) && ($endAt == null))
 				{
 					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1A = $On1B INNER JOIN $relArray[2] ON $On2A = $On2B ORDER BY $orderBy $orderMode");				
-				}	
+				}				
+				else if(($orderBy != null) && ($orderMode != null) && ($startAt != null) && ($endAt != null))
+				{
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1A = $On1B INNER JOIN $relArray[2] ON $On2A = $On2B ORDER BY $orderBy $orderMode LIMIT $startAt,$endAt");				
+				}				
 				else
 				{
 					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1A = $On1B INNER JOIN $relArray[2] ON $On2A = $On2B");				
-				}			
+				}	
+							
 
 			} // if (count($relArray) == 3 && count($typeArray) == 3)
+
+			/// Falta por revisar
+			
 
 			// Relacionar 4 tablas.
 			if (count($relArray) == 4 && count($typeArray) == 4)
@@ -199,9 +221,13 @@
 			
 				// Para este caso se debe iniciar primero con la tabla Hija primero
 				//https://www.miportalweb.org/curso-web/MarketPlace/relations?rel=t_Products,t_Categories,t_Subcategories,t_Stores&type=product,category,subcategory,store				
-				if (($orderBy != null) && ($orderMode != null))
+				if (($orderBy != null) && ($orderMode != null) && ($startAt == null) && ($endAt == null))
 				{
 					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1A = $On1B INNER JOIN $relArray[2] ON $On2A = $On2B INNER JOIN $relArray[3] ON $On3A = $On3B ORDER BY $orderBy $orderMode");							
+				}
+				else if(($orderBy != null) && ($orderMode != null) && ($startAt != null) && ($endAt != null))
+				{
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1A = $On1B INNER JOIN $relArray[2] ON $On2A = $On2B INNER JOIN $relArray[3] ON $On3A = $On3B ORDER BY $orderBy $orderMode LIMIT $startAt, $endAt");
 				}
 				else
 				{
@@ -223,7 +249,7 @@
 		// Peticiones GET tablas relacionadas CON filtro		
 		// Se debe colocar la Tabla Hijo, y despues la tabla Padre
 		// ==============================================================
-		static public function getRelFilterData($rel,$type,$linkTo,$equalTo,$orderBy,$orderMode)
+		static public function getRelFilterData($rel,$type,$linkTo,$equalTo,$orderBy,$orderMode,$startAt,$endAt)
 		{
 			// Separa los nombres de las tablas.
 			$relArray = explode(",",$rel);
@@ -256,9 +282,13 @@
 				$On1 = $relArray[0].".id_".$typeArray[1]."_".$typeArray[0];
 				$On2 = $relArray[1].".id_".$typeArray[1];
 
-				if (($orderBy != null) && ($orderMode != null))
+				if (($orderBy != null) && ($orderMode != null) && ($startAt == null) && ($endAt == null))
 				{
 					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1 = $On2 WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode");				
+				}
+				else if(($orderBy != null) && ($orderMode != null) && ($startAt != null) && ($endAt != null))
+				{
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1 = $On2 WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode LIMIT $startAt,$endAt");				
 				}
 				else
 				{
@@ -293,12 +323,15 @@
 				$On2A = $relArray[0].".id_".$typeArray[2]."_".$typeArray[0];	//"t_Products.id_subcategory_product";
 				$On2B = $relArray[2].".id_".$typeArray[2]; 	//"t_Subcategories.id_subcategory";
 
-				if (($orderBy != null) && ($orderMode != null))
+				if (($orderBy != null) && ($orderMode != null) && ($startAt == null) && ($endAt == null))
 				{
 					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1A = $On1B INNER JOIN $relArray[2] ON $On2A = $On2B WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode");
-
 				}
-				else
+				else if (($orderBy != null) && ($orderMode != null) && ($startAt != null) && ($endAt != null))
+				{
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1A = $On1B INNER JOIN $relArray[2] ON $On2A = $On2B WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode LIMIT $startAt,$endAt");
+				}
+				else				
 				{
 					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1A = $On1B INNER JOIN $relArray[2] ON $On2A = $On2B WHERE $linkTo = :$linkTo");
 				}
@@ -338,11 +371,15 @@
 				// Para este caso se debe iniciar primero con la tabla Hija primero
 				//https://www.miportalweb.org/curso-web/MarketPlace/relations?rel=t_Products,t_Categories,t_Subcategories,t_Stores&type=product,category,subcategory,store				
 
-				if (($orderBy != null) && ($orderMode != null))
+				if (($orderBy != null) && ($orderMode != null) && ($startAt == null) && ($endAt == null))
 				{
 					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1A = $On1B INNER JOIN $relArray[2] ON $On2A = $On2B INNER JOIN $relArray[3] ON $On3A = $On3B WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode");
 				}
-				else
+				else if (($orderBy != null) && ($orderMode != null) && ($startAt != null) && ($endAt != null))
+				{
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1A = $On1B INNER JOIN $relArray[2] ON $On2A = $On2B INNER JOIN $relArray[3] ON $On3A = $On3B WHERE $linkTo = :$linkTo LIMIT $startAt,$endAt");
+				}
+				else 
 				{
 					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1A = $On1B INNER JOIN $relArray[2] ON $On2A = $On2B INNER JOIN $relArray[3] ON $On3A = $On3B WHERE $linkTo = :$linkTo");
 				}
@@ -361,12 +398,12 @@
 
 		
 		// Peticiones GET para el Buscador
-		static public function getSearchData($table,$linkTo,$search)
+		static public function getSearchData($table,$linkTo,$search,$startAt,$endAt)
 		{
 			//https://www.miportalweb.org/curso-web/MarketPlace/t_Products?linkTo=name_product&search=wireless
 
 
-			$stmt = Connection::connect()->prepare("SELECT * FROM $table WHERE $linkTo LIKE '%$search%'");
+			$stmt = Connection::connect()->prepare("SELECT * FROM $table WHERE $linkTo LIKE '%$search%' LIMIT $startAt,$endAt");
 			$stmt->execute();
 			// fetchAll = Retorna todas las filas
 			// PDO:FETCH_CLASS = Solo mostrara los nombre de columna con su contenido

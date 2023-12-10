@@ -6,12 +6,12 @@
 		// *****************************************
 
 		// NO se asigna de forma estatica, ya que no se requiere almacenar, solo se mostrara.
-		public function getData($table,$orderBy,$orderMode)
+		public function getData($table,$orderBy,$orderMode,$startAt,$endAt)
 		{			
 			// PENDIENTE ::: Si se teclea de forma erronea el nombre de la tabla. 
 
 			// Obtener los datos de la tabla que se envio.
-			$response = GetModel::getData($table,$orderBy,$orderMode);
+			$response = GetModel::getData($table,$orderBy,$orderMode,$startAt,$endAt);
 		
 			// return // Si se desea saber que error esta pasando en el modelo
 
@@ -27,10 +27,10 @@
 		// 	Pasan variables GET: https://www.miportalweb.org/curso-web/MarketPlace/t_Categories?linkTo=url_category&equalTo=kitchen
 		//	Partiendo del "?", el resto de las dos variables "GET" "linkTo" y "equalTo" se utilizan en la base de datos para filtrar.
 		// ============================================================================================
-		public function getFilterData($table,$linkTo,$equalTo,$orderBy,$orderMode)
+		public function getFilterData($table,$linkTo,$equalTo,$orderBy,$orderMode,$startAt,$endAt)
 		{
 
-			$response = GetModel::getFilterData($table,$linkTo,$equalTo,$orderBy,$orderMode);
+			$response = GetModel::getFilterData($table,$linkTo,$equalTo,$orderBy,$orderMode,$startAt,$endAt);
 
 			// Esta funcion se define abajo ya que se repite varias veces 
 			$return = new GetController();
@@ -46,9 +46,9 @@
 		// category = id_category
 		//	product = id_product
 		// =================================================
-		public function getRelData($rel,$type,$orderBy,$orderMode)
+		public function getRelData($rel,$type,$orderBy,$orderMode,$startAt,$endAt)
 		{
-			$response = GetModel::getRelData($rel,$type,$orderBy,$orderMode);		
+			$response = GetModel::getRelData($rel,$type,$orderBy,$orderMode,$startAt,$endAt);		
 			/*
 			// Para que despliegue los valores en pantalla de la extraccion del metodo GetModel
 			$json = array(
@@ -66,18 +66,18 @@
 		}
 
 		// Peticiones GET tablas relacionadas Con filtro.
-		public function getRelFilterData($rel,$type,$linkTo,$equalTo,$orderBy,$orderMode)
+		public function getRelFilterData($rel,$type,$linkTo,$equalTo,$orderBy,$orderMode,$startAt,$endAt)
 		{
-			$response = GetModel::getRelFilterData($rel,$type,$linkTo,$equalTo,$orderBy,$orderMode);
+			$response = GetModel::getRelFilterData($rel,$type,$linkTo,$equalTo,$orderBy,$orderMode,$startAt,$endAt);
 
 			$return = new GetController();
 			$return->fncResponse($response,"getRelFilterData");
 		}
 
 		// Peticiones GET buscar en Tabla.
-		public function getSearchData($table,$linkTo,$search,$orderBy,$orderMode)
+		public function getSearchData($table,$linkTo,$search,$orderBy,$orderMode,$startAt,$endAt)
 		{
-			$response = GetModel::getSearchData($table,$linkTo,$search,$orderBy,$orderMode);
+			$response = GetModel::getSearchData($table,$linkTo,$search,$orderBy,$orderMode,$startAt,$endAt);
 
 			// Esta funcion se define abajo ya que se repite varias veces 
 			$return = new GetController();
