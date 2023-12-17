@@ -3,6 +3,8 @@
 	Tipos de datos de MariaDB
   https://www.anerbarrena.com/tipos-dato-mysql-5024/
 
+*/
+
 /*
 
 -- Ejecutarlo desde una terminal de Mysql 
@@ -38,14 +40,12 @@ Para ejecutar el "script"
 DROP DATABASE IF EXISTS bd_tienda_virtual;
 
 CREATE DATABASE IF NOT EXISTS bd_tienda_virtual;
- /* SET time_zone = 'America/Tijuana';  
+  SET time_zone = 'America/Tijuana';  
 
 CREATE USER 'usuario_tienda'@'localhost' IDENTIFIED BY 'Tienda_2022';
 GRANT ALL on bd_tienda_virtual.* to 'usuario_tienda'  IDENTIFIED BY 'Tienda_2022';
 
 */
-
-USE bd_marketplace;
 
 
 /* 
@@ -66,4 +66,35 @@ ALTER TABLE t_Permisos ADD u TINYINT DEFAULT 0;
 /*
 ALTER TABLE t_Rol DROP status;
 ALTER TABLE t_Rol ADD status TEXT DEFAULT 1;
+*/
+
+/* Para modificar la longuitud de un campo: 
+	ALTER TABLE t_Rep_Finanzas MODIFY COLUMN nombre VARCHAR(50);
+
+*/
+
+/* 
+Cambiar el nombre de un campo. 
+
+ALTER TABLE `t_Personas` CHANGE `toke` `token` VARCHAR(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;
+
+*/
+
+/*
+ Para agregar una columna a la tabla t_Responsivas. 
+	ALTER TABLE t_Responsivas ADD fecha_devolucion date NULL;
+*/
+
+/*
+INSERT INTO t_Cintas (id_cintas,num_serial,fecha_inic,fecha_final,ubicacion,comentarios) VALUES
+  (0,'URL30405','2021-01-20','2021-01-23','UBICACION XX','COMENTARIOS VARIOS');
+*/
+
+/* Para agregar una columna a la tabla t_Productos . 
+	ALTER TABLE t_Productos ADD especificaciones TEXT NULL ;
+*/
+
+/*
+	USE bd_marketplace;
+	ALTER TABLE t_Users ADD token_exp_user TEXT NULL;
 */

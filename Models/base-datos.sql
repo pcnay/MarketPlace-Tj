@@ -115,7 +115,6 @@ CREATE TABLE t_Subcategories
 );
 
 
-
 CREATE TABLE t_Users
 (
 	id_user	INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
@@ -130,6 +129,7 @@ CREATE TABLE t_Users
 	phone_user VARCHAR(50),
 	address_user TEXT DEFAULT NULL,
 	token_user TEXT DEFAULT NULL,
+	token_exp_user TEXT DEFAULT NULL,
 	method_user	TEXT DEFAULT NULL,
 	wishlist_user	TEXT DEFAULT NULL,
 	date_created_user TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

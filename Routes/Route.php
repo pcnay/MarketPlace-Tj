@@ -1,5 +1,10 @@
 <?php
 
+	//error_reporting(0);// NO muestra el error desde otro archivo de PHP (para este caso es JWT)
+	use Firebase\JWT\JWT; // Para llamar a la libreria.
+	use Firebase\JWT\Key;
+	
+
 /*
 
 // REQUEST_URI = Para extraerlas palabras despues del nombre de dominio
@@ -45,9 +50,9 @@ $routesArray = (array_filter($routesArray));
 // Cambiar este valor ya que actualmente se esta usando : "curso-web/MarketPlace"
 if (count($routesArray)==2)
 {
-	/*
+	
 	$json = array( 
-		"status" => 400, 	
+		"status" => 404, 	
 		"result" =>"Not Found" 	
 	); 
 
@@ -55,7 +60,7 @@ if (count($routesArray)==2)
 	echo json_encode($json,http_response_code($json["status"]));
 
 	return; 	
-	*/
+	
 	// Solicitar respuesta del Controlador para crear datos desde cualquier Tabla.
 	if (isset($_POST))
 	{
@@ -314,6 +319,10 @@ else
 
 		if (isset($_POST))
 		{
+
+		/* Esta seccion de codigo es una version vieja para determinar si son iguales el numero de columnas con la peticion POST con la tabla de la Base de Datos.
+			Pero no sera necesrio, ya que se tiene otra version mas flexible para el numero de campos a utilizar.
+
 			// Que valores retorna la variable super global de $_POST.
 			//echo '<pre>';
 			//print_r ($_POST);
@@ -332,6 +341,15 @@ else
 				if (array_keys($_POST)[$key] == $value)
 				{
 					$count++; // coinciden el numero de columnas de la variable $_POST(formulario) con las campos de la Base de Datos.					
+				}
+				else
+				{
+					$json = array(
+						'status' => 400,
+						"result" => 'Error: Fields in the form do not match the database'
+					);
+					echo json_encode($json,http_response_code($json["status"]));
+					return;
 				}
 			} //foreach ($columns as $key => $value) 
 
@@ -352,6 +370,145 @@ else
 				echo json_encode($json,http_response_code($json["status"]));
 				return;
 			}
+			*/
+			// Esta es la version optimizada para leer numero de columnas variables de la peticion POST, ademas se utiliza tambien en el registro de usuario, ya que en la Tabla "t_Users" no se requieren todos los campos para el registro de Usuario.
+
+				// Se valida que los campos de la variable Global PUT coincidan con los campos de la tabala en curso.
+				// Mostrando en contenido de las llaves
+				
+				$count = 0;
+				foreach (array_keys($_POST) as $key => $value)
+				{
+					// Busca el valor de "$value" en el arreglo "$columns"
+					$count = array_search($value,$columns);
+					/*
+					echo '<pre>';
+					print_r($value);
+					echo "</br>";
+					echo '</pre>';
+					*/
+				}		
+					/*
+					// Para determinar cuantos elementos tienen coincidencia.
+					echo '<pre>';
+					print_r($count);
+					echo '</pre>';					
+					return;
+					*/
+
+					// Si una columna no coincide el valor sera 0.					
+					if ($count >0)
+					{
+						// Solicitamos respuesta del Controllador para Registrar Usuarios.
+						if (isset($_GET["register"]) && $_GET["register"] == true)
+						{
+							/*
+							// Para determinar que valor tiene la variable "$_GET["register"]"
+							$json = array(
+								"status" => 200,
+								//"summary" => count($response),
+								"result" => $_GET["register"]
+							);
+
+							echo json_encode($json,http_response_code($json["status"]));	
+
+							return;
+							*/
+				
+							$response = new PostController();
+							$response->PostRegister(explode("?",$routesArray[3])[0],$_POST);		
+							
+						}
+						else if (isset(($_GET["login"])) && ($_GET["login"] == true)) // Para el caso del "Login" Usuario.
+						{
+							// Solicitamos respuesta del controlador para el ingreso de usuario
+
+							$response = new PostController();
+							$response->PostLogin(explode("?",$routesArray[3])[0],$_POST);
+
+							// Validar el "token" de autenticacion.
+						}
+						else if (isset($_GET["token"]))
+						{
+							// Validar que el Token no este vencido.
+							//$key = "zxcvbnmqwertyuio23561jdk0251fj";
+							// $jwt = JWT::decode($_GET["token"],$key,array('HS256'));
+
+							// Este formato lo reconoce con la version 7.4 de PH y 2.2 de JWT
+							// Retorna un formato "epoch", por lo que se tiene que accesar a la pagina : https://www.epochconverter.com/
+							//$jwt = JWT::decode($_GET["token"], new Key($key, 'HS256'));
+							
+							/*
+							echo '<pre>';
+							print_r($jwt->exp);
+							echo '</pre>';					
+							return;
+							*/
+
+								// Traer el usuario de acuerdo al Token
+								$user = GetModel::getFilterData("t_Users","token_user",$_GET["token"],null,null,null,null);
+
+								/*
+								// Para determinar cuantos elementos tienen coincidencia.
+								echo '<pre>';
+								print_r($user);
+								echo '</pre>';					
+								return;
+								*/
+
+								if (!empty($user)) // Existe el Usuario
+								{
+									// Valida que el token no haya expirado.
+									$time = time();
+									if ($user[0]->token_exp_user > $time ) // El token aun no ha expirado.
+									{										
+										// Respuesta del controaldor para editar cualquier tabla.
+										$response = new PostController();
+										$response->PostData(explode("?",$routesArray[3])[0],$_POST);			
+									}	
+									else
+									{
+										$json = array(
+											'status' => 400,
+											"results" => 'Error: the token has expired'
+										);
+										echo json_encode($json,http_response_code($json["status"]));
+										return;		
+									}		// if ($user[0]->token_exp_user < $time ) // El token aun no ha expirado.
+								}
+								else
+								{
+									$json = array(
+										'status' => 400,
+										"results" => 'Error: the user is not authorized'
+									);
+									echo json_encode($json,http_response_code($json["status"]));
+									return;		
+								} // if (!empty($user)) // Existe el Usuario							
+						}
+						else
+						{
+							$json = array(
+								'status' => 400,
+								"results" => 'Error: Authorization required'
+							);
+							echo json_encode($json,http_response_code($json["status"]));
+							return;	
+	
+						} //if (isset($_GET["register"]) && $_GET["register"] == true)
+
+					} // if ($count >0)
+
+					else // if ($count >0)
+					{
+						$json = array(
+							'status' => 400,
+							"results" => 'Error: Fields in the form do not match the database'
+						);
+						echo json_encode($json,http_response_code($json["status"]));
+						return;	
+					} // if ($count >0)
+
 			
 		} //if (isset($_POST))
 
@@ -474,18 +631,62 @@ else
 					// Si una columna no coincide el valor sera 0.					
 					if ($count >0)
 					{
-						// Respuesta del controaldor para editar cualquier tabla.
-						$response = new PutController();
-						$response->putData(explode("?",$routesArray[3])[0],$data,$_GET["id"],$_GET["nameId"]);		
+						/////////////////////////////////////////////////
+						if (isset($_GET["token"]))
+						{
+							// Traer el usuario de acuerdo al Token
+							$user = GetModel::getFilterData("t_Users","token_user",$_GET["token"],null,null,null,null);
+
+							/*
+							// Para determinar cuantos elementos tienen coincidencia.
+							echo '<pre>';
+							print_r($user);
+							echo '</pre>';					
+							return;
+							*/
+
+							if (!empty($user)) // Existe el Usuario
+							{
+								// Valida que el token no haya expirado.
+								$time = time();
+								if ($user[0]->token_exp_user > $time ) // El token aun no ha expirado.
+								{																		
+									// Respuesta del controaldor para editar cualquier tabla.
+									$response = new PutController();
+									$response->putData(explode("?",$routesArray[3])[0],$data,$_GET["id"],$_GET["nameId"]);
+								}
+								else // if ($user[0]->token_exp_user > $time ) // El token aun no ha expirado.
+								{
+									$json = array(
+										'status' => 400,
+										"results" => 'Error: the token has expired'
+									);
+									echo json_encode($json,http_response_code($json["status"]));
+									return;		
+								}	// if ($user[0]->token_exp_user > $time ) // El token aun no ha expirado.
+
+							}
+							else
+							{
+								$json = array(
+									'status' => 400,
+									"results" => 'Error: the user is not authorized'
+								);
+								echo json_encode($json,http_response_code($json["status"]));
+								return;		
+							} // if (!empty($user)) // Existe el Usuario
+
+						} //if (isset($_GET["token"]))
+
 					}
-					else
+					else // if ($count >0)
 					{
 						$json = array('status' => 400,
 						'results' => 'Error Fields in the form do not match the Database');
 						echo json_encode($json,http_response_code($json["status"]));
 						return;		
-					}
-			}
+					} // if ($count >0)
+			} // if ($response)
 			else
 			{
 				$json = array('status' => 400,
@@ -531,10 +732,49 @@ else
 				return; 		
 				*/
 
-				// Solicitamos respuesta del controlador.
-				$response_delete = new DeleteController();
-				$response_delete->deleteData(explode("?",$routesArray[3])[0],$_GET["id"],$_GET["nameId"]);
+				if (isset($_GET["token"]))
+				{
+					// Traer el usuario de acuerdo al Token
+					$user = GetModel::getFilterData("t_Users","token_user",$_GET["token"],null,null,null,null);
 
+					/*
+					// Para determinar cuantos elementos tienen coincidencia.
+					echo '<pre>';
+					print_r($user);
+					echo '</pre>';					
+					return;
+					*/
+
+					if (!empty($user)) // Existe el Usuario
+					{
+						// Valida que el token no haya expirado.
+						$time = time();
+						if ($user[0]->token_exp_user > $time ) // El token aun no ha expirado.
+						{																		
+							// Solicitamos respuesta del controlador.
+							$response_delete = new DeleteController();
+							$response_delete->deleteData(explode("?",$routesArray[3])[0],$_GET["id"],$_GET["nameId"]);
+						}
+						else // if ($user[0]->token_exp_user > $time ) // El token aun no ha expirado.
+						{
+							$json = array(
+								'status' => 400,
+								"results" => 'Error: the token has expired'
+							);
+							echo json_encode($json,http_response_code($json["status"]));
+							return;		
+						} // if ($user[0]->token_exp_user > $time ) // El token aun no ha expirado.
+					}
+					else
+					{
+						$json = array(
+							'status' => 400,
+							"results" => 'Error: the user is not authorized'
+						);
+						echo json_encode($json,http_response_code($json["status"]));
+						return;		
+					} // if (!empty($user)) // Existe el Usuario
+				}
 			}
 			else
 			{

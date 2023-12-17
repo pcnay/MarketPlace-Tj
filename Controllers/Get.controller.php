@@ -92,7 +92,7 @@
 				$json = array(
 					"status" => 200,
 					"summary" => count($response),
-					"result" => $response
+					"results" => $response
 				);
 
 			} //if (!empty($response))
@@ -100,7 +100,7 @@
 			{
 				$json = array(
 					"status" => 404,					
-					"result" => "Not found",
+					"results" => "Not found",
 					"method" => $method
 				);
 			}

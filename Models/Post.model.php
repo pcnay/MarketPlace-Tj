@@ -3,15 +3,11 @@
 
 	class PostModel
 	{
-
 			// Obteniendo los nombres de los campos.
 			static public function getColumnsData($table, $database)
 			{
 				return Connection::connect()->query("SELECT COLUMN_NAME AS item FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '$database' AND TABLE_NAME = '$table'")->fetchAll(PDO::FETCH_OBJ);
-
 			}
-
-
 
 		// Peticion POST para crear datos
 		static public function postData($table, $data)
