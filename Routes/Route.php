@@ -237,8 +237,22 @@ else
 				$endAt = null;				
 			}
 			
-			$response = new GetController();
-			$response->getSearchData(explode("?",$routesArray[3])[0],$_GET["linkTo"],$_GET["search"],$orderBy,$orderMode,$startAt,$endAt);
+			// Cuando es mas de una tabla a buscar.
+			// Se esta realizando una petecion entre tablas relacionadas
+			if ( (explode("?",$routesArray[3])[0] == "relations") && (isset($_GET["rel"])) && (isset($_GET["type"])) )
+			{
+				// Buscando en una sola tabla.
+				$response = new GetController();
+				$response->getSearchRelData($_GET["rel"],$_GET["type"],$_GET["linkTo"],$_GET["search"],$orderBy,$orderMode,$startAt,$endAt);
+			}
+			else
+			{
+				// Buscando en una sola tabla.
+				$response = new GetController();
+				$response->getSearchData(explode("?",$routesArray[3])[0],$_GET["linkTo"],$_GET["search"],$orderBy,$orderMode,$startAt,$endAt);
+			}
+
+
 		}
 		else // Peticiones GET sin Filtro
 		{

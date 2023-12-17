@@ -84,6 +84,21 @@
 			$return->fncResponse($response,"getSearchData");		
 		}
 		
+		// =================================================
+		// Peticiones GET tablas relacionadas sin filtro.
+		// https://www.miportalweb.org/relations?rel=t_Categories,t_Products&type=category,product
+		// rel = 	t_Categories
+		//				t_Products
+		// category = id_category
+		//	product = id_product
+		// =================================================
+		public function getSearchRelData($rel,$type,$linkTo,$search,$orderBy,$orderMode,$startAt,$endAt)
+		{
+			$response = GetModel::getSearchRelData($rel,$type,$linkTo,$search,$orderBy,$orderMode,$startAt,$endAt);
+			$return = new GetController();
+			$return->fncResponse($response,"getSearchRelData");
+		}
+
 		// Respuestas del controlador, cuando realizan los GET a la tabla de datos.
 		public function fncResponse($response,$method)
 		{
