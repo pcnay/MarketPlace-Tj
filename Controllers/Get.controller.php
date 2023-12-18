@@ -92,6 +92,9 @@
 		// category = id_category
 		//	product = id_product
 		// =================================================
+		// https://www.miportalweb.org/curso-web/MarketPlace/relations?rel=t_Products,t_Categories,t_Subcategories,t_Stores&type=product,category,subcategory,store&linkTo=name_product&search=portable&orderBy=id_product&orderMode=DESC&startAt=0&$endAt=1
+
+		
 		public function getSearchRelData($rel,$type,$linkTo,$search,$orderBy,$orderMode,$startAt,$endAt)
 		{
 			$response = GetModel::getSearchRelData($rel,$type,$linkTo,$search,$orderBy,$orderMode,$startAt,$endAt);
