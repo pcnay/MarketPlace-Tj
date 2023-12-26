@@ -741,7 +741,8 @@
 
     $(window).on('load', function() {
         $('body').addClass('loaded');
-        subscribePopup();
+        //subscribePopup(); // Es la ventana que se muestra al cargar la pagina
+
     });
 
     $.scrollUp({

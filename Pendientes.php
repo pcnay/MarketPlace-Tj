@@ -1,6 +1,10 @@
 <?php
 /*
 
+{"A":"20%","B":"Discount", "C":"For Books Of March", "D":"Enter Promotion", "E":"Sale2019","F":"Shop now","G":"header-promotion-1.jpg"}
+
+
+
 https://themeforest.net/item/martfury-multipurpose-marketplace-html5-template-with-dashboard
 
 

@@ -22,14 +22,17 @@
 				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 				CURLOPT_CUSTOMREQUEST => $method,
 				CURLOPT_POSTFIELDS => $fields,
-				CURLOPT_POSTFIELDS => $header
+				CURLOPT_HTTPHEADER => $header
 		));
 
 			$response = curl_exec($curl); // Respuesta de la API
 			curl_close($curl);
+
+			// Lo convierte a un arreglo de Objetos 
 			$response = json_decode($response);
 
-			return $response;
+			return $response; // Retorna el arreglo
+
 		} // 	static public function request()
 
 	} // 	class CurlController

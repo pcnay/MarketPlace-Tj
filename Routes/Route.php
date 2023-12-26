@@ -133,7 +133,7 @@ else
 			}
 			else
 			{
-				$startAT = null;
+				$startAt = null;
 				$endAt = null;				
 			}
 
