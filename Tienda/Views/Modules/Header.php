@@ -8,10 +8,9 @@
 	// $menuCategories = CurlController::request($url,$method,$fields,$header);
 	// Para solo extraer los resultados, 
 	$menuCategories = CurlController::request($url,$method,$fields,$header)->results;
-	echo '<pre>';
+//	echo '<pre>';
 //		print_r($menuCategories);
-	echo '</pre>';	
-
+//echo '</pre>';	
 
 ?>
 
@@ -110,19 +109,20 @@ Header Content
 																			<h4><?php echo $value; ?><span class="sub-toggle"></span></h4>
 																			<ul class="mega-menu__list">
 																				<!-- Traer las subcategorias -->
-																				<?php																																								
+																				<?php																																							
 																					$url = CurlController::api()."t_Subcategories?&linkTo=title_list_subcategory&equalTo=".rawurlencode($value);
 																					$method = "GET";
 																					$fields = array();
 																					$header = array();
 																					$menuSubcategories = CurlController::request($url,$method,$fields,$header)->results;
+
 																					//echo '<pre>';
 																					//	print_r($menuSubcategories);
 																					//echo '</pre>';
 																				?>
 
 																				<?php foreach ($menuSubcategories as $key => $value): ?>
-																					<li><a href="<?php echo $value->url_subcategory ?>"><?php echo $value->name_subcategory ?></a>
+																					<li><a href="<?php echo $value->url_subcategory ?>"><?php echo $value->name_subcategory; ?></a>
 																					</li>
 																				<?php endforeach ?>
 

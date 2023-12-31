@@ -16,6 +16,55 @@
 	//print_r($total); // Mas legible para leer utilizando "print_r"
 	//print_r($totalProducts); // Mas legible para leer utilizando "print_r"
 	//echo '</pre>';
+
+	// REQUEST_URI = Para extraerlas palabras despues del nombre de dominio
+	// HTTP_HOST = Extraer el nombre del dominio
+	
+
+	// ============= CAPTURAR LAS RUTAS DE LA URL ===============
+	// Usando comandos de PHP para convertir la cadena en un arreglo y poder extraer lo que se requiere
+		/*
+---------->>>>>> 	Se debe tener encuenta, cuando cambie la URL en la barra de direcciones. Ya que por lo general solo es:
+	https://www.miportalweb.org/sitio
+
+		[0]] => 
+    [1] => curso-web
+    [2] => MarketPlace
+    [3] => Categorias
+*/
+
+$routesArray = explode("/",$_SERVER['REQUEST_URI']);
+// Elimina el espacio en blanco, quedando
+/*
+[1] => curso-web
+[2] => MarketPlace
+[3] => Categorias
+*/
+
+$routesArray = (array_filter($routesArray));
+//$routesArray = (array_filter($routesArray)); Retorna: "curso-web", "MarketPlace", el dominio es : "wwww.miportalweb.org"
+// Se tiene que cambiar dependiendo de las carpetas que se usen.
+// Por esta razon se selecciona : "$routesArray[3]
+	//$routesArray = $routesArray[3];
+
+	// Para extraer palabra despues del dominio. "curso-web/MarketPlace/Categorias"
+	//$name_table = $routesArray[3];
+	//$routesArray = $routesArray[3];
+
+
+	echo '<pre>';
+	print_r($routesArray);
+	echo '</pre>';
+	/* 
+		[1] => curso-web
+    [2] => MarketPlace
+    [3] => Tienda
+    [4] => Views
+    [5] => rayban-rounded-sunglass-brown-color
+		Por lo que se tiene que dejar solo el indice [5], por lo que se tiene que modificar en ".htaccess" y en "Controllers" (template.controller.php)
+
+	*/ 
+
 ?>
 
 
@@ -165,14 +214,12 @@
     <!--=====================================
     Preload
     ======================================-->
-<!--
+
     <div id="loader-wrapper">
         <img src="img/template/loader.jpg">
         <div class="loader-section section-left"></div>
         <div class="loader-section section-right"></div>
     </div>  
--->
-
 
 	<!--=====================================
 	Header Promotion

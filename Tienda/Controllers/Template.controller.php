@@ -6,5 +6,7 @@
 		{
 			include "Views/template.php";
 		}
-	}
+
+		
+	} // class TemplateController
 ?>

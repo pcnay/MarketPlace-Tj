@@ -129,7 +129,7 @@ else
 			if ((isset($_GET["startAt"])) && isset($_GET["endAt"]))
 			{
 				$startAt = $_GET["startAt"];
-				$endAT = $_GET["endAt"];
+				$endAt = $_GET["endAt"];
 			}
 			else
 			{
@@ -196,11 +196,11 @@ else
 			if ((isset($_GET["startAt"])) && isset($_GET["endAt"]))
 			{
 				$startAt = $_GET["startAt"];
-				$endAT = $_GET["endAt"];
+				$endAt = $_GET["endAt"];
 			}
 			else
 			{
-				$startAT = null;
+				$startAt = null;
 				$endAt = null;				
 			}
 
@@ -233,7 +233,7 @@ else
 			}
 			else
 			{
-				$startAT = null;
+				$startAt = null;
 				$endAt = null;				
 			}
 			
