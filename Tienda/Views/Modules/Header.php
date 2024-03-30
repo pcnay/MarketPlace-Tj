@@ -1,6 +1,9 @@
 <?php
 	// Traer Listado de Categorias.
 	$url = CurlController::api()."t_Categories";
+
+	$path = TemplateController::path(); // "curso-web/MarketPlace/Tienda"
+
 	$method = "GET";
 	$fields = array();
 	$header = array();
@@ -71,12 +74,12 @@ Header Content
 						<!--=====================================
 		Logo
 		======================================-->
-
-						<a class="ps-logo" href="/curso-web/MarketPlace/Tienda/index.php">
+						<!-- href="/curso-web/MarketPlace/Tienda/index.php"> --> 
+						<a class="ps-logo" href="<?php echo $path; ?>">
 							<img src="img/template/logo_light.png" alt="">
 						</a>
 
-						<!--=====================================
+		<!--=====================================
 		Menú
 		======================================-->
 
@@ -92,7 +95,7 @@ Header Content
 												<?php foreach ($menuCategories as $key => $value): ?>
 												
 													<li class="menu-item-has-children has-mega-menu">
-														<a href="<?php echo $value->url_category ?>"><i class="<?php echo $value->icon_category ?>"></i> <?php echo $value->name_category; ?></a>
+														<a href="<?php echo $path.$value->url_category ?>"><i class="<?php echo $value->icon_category ?>"></i> <?php echo $value->name_category; ?></a>
 
 															<div class="mega-menu">
 																<!-- Traer el listado de titulos -->
@@ -121,9 +124,12 @@ Header Content
 																					//echo '</pre>';
 																				?>
 
-																				<?php foreach ($menuSubcategories as $key => $value): ?>
-																					<li><a href="<?php echo $value->url_subcategory ?>"><?php echo $value->name_subcategory; ?></a>
-																					</li>
+																				<?php 
+																					foreach ($menuSubcategories as $key => $value): ?>
+																						<li>
+																							<a href="<?php echo $path.$value->url_subcategory ?>">
+																							<?php echo 		$value->name_subcategory; ?></a>
+																						</li>
 																				<?php endforeach ?>
 
 																			</ul>

@@ -10,6 +10,7 @@
 		}
 		
 		// Nombre de la Base De Datos.
+		// Cambiarlo cuando se cambie de proyecto.
 		static public function database()
 		{
 			return "bd_marketplace";

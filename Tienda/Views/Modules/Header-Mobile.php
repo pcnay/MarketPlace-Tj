@@ -79,7 +79,7 @@ Menu Mobile
 									<?php foreach ($menuCategories as $key => $value): ?>
 																		
 										<li class="current-menu-item menu-item-has-children">
-											<a href="<?php echo $value->url_category; ?>"><?php echo $value->name_category; ?>
+											<a href="<?php echo $path.$value->url_category; ?>"><?php echo $value->name_category; ?>
 											</a>
 											<span class="sub-toggle"><i class="fa fa-angle-down"></i>
 											</span>
@@ -102,7 +102,7 @@ Menu Mobile
 
 													<?php foreach ($menuSubcategories as $key => $value): ?>
 														<li>
-															<a href="<?php echo $value->url_subcategory ?>"><?php echo $value->name_subcategory; ?>
+															<a href="<?php echo $path.$value->url_subcategory ?>"><?php echo $value->name_subcategory; ?>
 															</a>																					
 														</li>
 													<?php endforeach ?>
@@ -118,7 +118,7 @@ Menu Mobile
 
 				</div><!-- End menu-->
 
-			<a class="ps-logo pl-3 pl-sm-5" href="index.html">
+			<a class="ps-logo pl-3 pl-sm-5" href="<?php echo $path; ?>">
 				<img src="img/template/logo_light.png" class="pt-3" alt="">
 			</a>
 
