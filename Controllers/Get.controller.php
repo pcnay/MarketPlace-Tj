@@ -16,15 +16,22 @@
 			$return->fncResponse('GetData',$arreglo_parametros);
 		} // public function getData($tabla)
 
+		// PETICIONES GET "CON"FILTRO.
 		public function getDataOrder($arreglo_parametros)
+		{				
+			$return = new GetController();
+			$return->fncResponse('GetDataOrder',$arreglo_parametros);
+		} // public function getDataOrder($tabla)
+
+		public function getOrderData($arreglo_parametros)
 		{				
 
 			//echo "<pre>";print_r($arreglo_parametros);echo"</pre>";
 			//exit;
 
 			$return = new GetController();
-			$return->fncResponse('GetDataOrder',$arreglo_parametros);
-		} // public function getData($tabla)
+			$return->fncResponse('GetOrderData',$arreglo_parametros);
+		} // public function getLimiteData($tabla)
 
 		public function getLimiteData($arreglo_parametros)
 		{				
@@ -34,10 +41,10 @@
 
 			$return = new GetController();
 			$return->fncResponse('GetLimiteData',$arreglo_parametros);
-		} // public function getData($tabla)
-
+		} // public function getLimiteData($tabla)
 
 		// Metodo NO static = Se ejecuta inmediatamente, por lo que no se necesita Almacenar
+		// Peticiones GET CON Filtro.
 		public function getFilterData($arreglo_parametros)
 		{				
 			$return = new GetController();
@@ -57,22 +64,15 @@
 	// ==================================================
 	// Peticiones GET con tablas relacionadas SIN Filtro
 	// ==================================================
-	public function getRelData($tablas,$campos,$orderBy,$orderMode)
+	public function getRelData($arreglo_parametros)
 	{	
-		$arreglo_parametros = array();
-		$arreglo_parametros['tabla'] = $tablas;
-		$arreglo_parametros['campo_tabla'] = $campos;
-		$arreglo_parametros['orderBy'] = $orderBy;
-		$arreglo_parametros['orderMode'] = $orderMode;
-
 		$return = new GetController();
 		$return->fncResponse('GetRelData',$arreglo_parametros);
 	} // public function getRelData($tabla)
 
 	// ==================================================
 	// Peticiones GET con tablas relacionadas CON Filtro
-	// ==================================================
-	
+	// ==================================================	
 	public function getRelFilterData($arreglo_parametros)
 	{
 		$return = new GetController();
@@ -173,7 +173,7 @@
 
 		} // if ($nombre_funcion == 'GetDataOrder')
 
-		if ($nombre_funcion == 'GetLimiteData')
+		if ($nombre_funcion == 'GetOrderData')
 		{
 			// Determinar si la tabla existe.
 			//$Table_found = new GetController();
@@ -218,6 +218,50 @@
 
 		} // if ($nombre_funcion == 'GetLimiteData')
 		
+		if ($nombre_funcion == 'GetLimiteData')
+		{
+			// Determinar si la tabla existe.
+			//$Table_found = new GetController();
+			//echo '<pre>';print_r($arreglo_parametros['tabla']);echo'</pre>';
+			//exit;
+			
+			if ($Table_found->found_Table($arreglo_parametros['tabla']) == 'S')
+			{						
+				if ($Table_found->Valor_Positivo($arreglo_parametros) == 'S')
+				{
+					// Obtener la informacion desde la base de datos.
+					$response = GetModel::getData($arreglo_parametros);
+
+					$json = array(
+						'status' => 200,
+						'total' => count($response),
+						'results' => $response
+					);			
+
+				} // if (($Table_found->found_Field_Table($arreglo_parametros['campo_tabla'])) == 'S')
+				else
+				{
+					$json = array(
+						'status' => 404,					
+						'results' => "Not Field Found",
+						'method' => 'GetLimiteData'
+					);
+				} // if (($Table_found->found_Field_Table($arreglo_parametros['campo_tabla'])) == 'S')		
+					
+			} // if ($Table_found->found_Table($arreglo_parametros['tabla']) == 'S')
+			else
+			{
+				$json = array(
+					'status' => 404,					
+					'results' => "Not Table Found",
+					'method' => 'GetLimiteData'
+				);
+			} // if ($Table_found->found_Table($table) == 'S')
+
+			echo json_encode($json,http_response_code($json["status"]));		
+			return;
+
+		} // if ($nombre_funcion == 'GetLimiteData')
 
 		if  ($nombre_funcion == 'GetFilterData')
 		{
@@ -390,7 +434,7 @@
 				echo json_encode($json,http_response_code($json["status"]));		
 				return;
 			}	
-		} //if  ($nombre_funcion == 'GetFilterData')
+		} //if  ($nombre_funcion == 'GetSearchData')
 
 		if ($nombre_funcion == 'GetRelData')
 		{
@@ -513,48 +557,66 @@
 			$arreglo_parametros["campo_tabla"] = $arreglo_parametros["campo_tabla"].','.$arreglo_parametros["campo_teclado"];
 
 			//echo '<pre>';print_r($arreglo_parametros['campo_tabla']);echo'</pre>';
+			//echo '<pre>';print_r("GetRelFilterData");echo'</pre>';
 			//exit;
 
-
-
 			if ($Table_found->found_Table($arreglo_parametros['tabla']) == 'S')
-			{					
+			{
+				//$Campos = $arreglo_parametros['campo_tabla'].','.$arreglo_parametros['linkTo'].','.$arreglo_parametros['orderBy'];
+
 				if (($Table_found->found_Field_Table($arreglo_parametros['campo_tabla'])) == 'S')
+				//if (($Table_found->found_Field_Table($Campos)) == 'S')
 				{
 					// Verificando el nombre del Filtro : "linkTo","equalTo"
-					// Obtener la informacion desde la base de datos.						
-					$arreglo_parametros['campo_tabla'] = $arreglo_campos_original['campo_tabla'];
-
-					$response = GetModel::getRelFilterData($arreglo_parametros);	
-
-					if (!empty($response))						
+					// Obtener la informacion desde la base de datos.			
+					if (($Table_found->found_Field_Table($arreglo_parametros['linkTo'])) == 'S')
 					{
-						$json = array(
-							'status' => 200,
-							'total' => count($response),
-							'results' => $response
-						);				
-						echo json_encode($json,http_response_code($json["status"]));		
-						return;										
-					}
+						$arreglo_parametros['campo_tabla'] = $arreglo_campos_original['campo_tabla'];
+
+						$response = GetModel::getRelFilterData($arreglo_parametros);	
+
+						if (!empty($response))						
+						{
+							$json = array(
+								'status' => 200,
+								'total' => count($response),
+								'results' => $response
+							);				
+							echo json_encode($json,http_response_code($json["status"]));		
+							return;										
+						}
+						else
+						{
+							$json = array(
+								'status' => 404,					
+								'results' => "Not Datas Found"								
+							);
+							echo json_encode($json,http_response_code($json["status"]));		
+							return;								
+
+						} //	if (!empty($response))	
+
+					} // if (($Table_found->found_Field_Table($arreglo_parametros['linkTo'])) == 'S')
 					else
 					{
 						$json = array(
 							'status' => 404,					
-							'results' => "Not Datas Found"								
+							'results' => "LinkTo Field Not Found",
+							'method' => 'GetRelFilterData'
 						);
+	
 						echo json_encode($json,http_response_code($json["status"]));		
-						return;								
+						return;	
 
-					} //	if (!empty($response))	
+					}// if (($Table_found->found_Field_Table($arreglo_parametros['linkTo'])) == 'S')
 
 				}	// if (($Table_found->found_Field_Table($arreglo_parametros['campo_tabla'])) == 'S')
 				else
 				{
 						$json = array(
 							'status' => 404,					
-							'results' => "Not Field Found",
-							'method' => 'GetRelData'
+							'results' => "Table Field Not Found",
+							'method' => 'GetRelFilterData'
 						);
 	
 						echo json_encode($json,http_response_code($json["status"]));		
@@ -567,7 +629,7 @@
 				$json = array(
 					'status' => 404,					
 					'results' => "Not Table Found",
-					'method' => 'GetRelData'
+					'method' => 'GetRelFilterData'
 				);
 
 				echo json_encode($json,http_response_code($json["status"]));		
@@ -663,7 +725,7 @@
 
 		static public function Valor_Positivo($arreglo_parametros)
 		{			
-			if (($arreglo_parametros['startAt'] > 0) && ($arreglo_parametros['endAt'] > 0))
+			if (($arreglo_parametros['startAt'] >= 0) && ($arreglo_parametros['endAt'] > 0))
 			{
 				$Positivo = 'S';
 			}

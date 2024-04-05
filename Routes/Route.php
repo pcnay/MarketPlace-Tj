@@ -84,6 +84,7 @@ else // if (count($routesArray)==2)
 
 		// ===================================================
 		// Petecion GET CON Filtro.
+		// !isset($_GET["rel"]) = Que no venga la variable GET "rel"
 		// ===================================================
 		if ( (isset($_GET["linkTo"])) && (isset($_GET["equalTo"])) && (!isset($_GET["rel"])) && (!isset($_GET["type"])) )
 		{	
@@ -128,17 +129,15 @@ else // if (count($routesArray)==2)
 			
 			$Obtener_linkTo = $Filtros[0];
 			$Campo_Filtro = explode("&",$Filtros[1]);
-			$Obtener_campo = $Campo_Filtro[0];
-
-					
+			$Obtener_campo = $Campo_Filtro[0];					
 			$Obtener_equalTo = $Campo_Filtro[1];
 			$Valor_linkTo = $_GET['linkTo'];
 			$Valor_equalTo = $_GET['equalTo'];			
+
 			$arreglo_parametros = array();
 			$arreglo_parametros['tabla'] = $tabla;
 			$arreglo_parametros['linkTo'] = $Obtener_linkTo;
 			$arreglo_parametros['Valor_linkTo'] = $Valor_linkTo;
-
 			$arreglo_parametros['campo_tabla'] = $Obtener_campo;
 			$arreglo_parametros['equalTo'] = $Obtener_equalTo;
 			$arreglo_parametros['Valor_equalTo'] = $Valor_equalTo;
@@ -163,17 +162,16 @@ else // if (count($routesArray)==2)
 			}
 		}
 			// ===================================================
-			// Petecion GET entre tablas Relacionadas CON Filtro.
+			// Petecion GET entre tablas Relacionadas SIN Filtro.
 			// ===================================================
 			// explode("?",$routesArray[3])[0] = Es donde incluye la palabra "relations" (https://www..../MarketPlace/"relations"?rel=t_Products/...)
-		else if ((isset($_GET["rel"])) && (isset($_GET["type"])) && (explode("?",$routesArray[3])[0] == "relations") && (!isset($_GET["linkTo"])) && (!isset($_GET["equalTo"])))
+		else if ((isset($_GET["rel"])) && (isset($_GET["type"])) && ((explode("?",$routesArray[3])[0] == "relations")) && (!isset($_GET["linkTo"])) && (!isset($_GET["equalTo"])))
 		{
 			// Separando los componentes de la URL que teclea el usuario.
 			$URL_separado = explode("?",$routesArray[3]);
 			//echo '<pre>';print_r($URL_separado);echo'</pre>';
-			//echo 'Se esta ejecutando la condicion';
+			//echo 'Se esta ejecutando la condicion CON FILTRO CONSULTAS RELACIONADAS';
 			//exit;
-
 
 			$relations = $URL_separado[0];
 			$separar_tablas = explode("=",$URL_separado[1]);
@@ -192,10 +190,22 @@ else // if (count($routesArray)==2)
 				$orderMode = null;
 				$campos  = $separar_tablas[2];
 			}
+
+			// Se verifica si vienen las Supervariables Globales para limitar los registros.
+			if ((isset($_GET["startAt"])) && (isset($_GET["endAt"])))
+			{
+				$startAt = $_GET["startAt"];
+				$endAt = $_GET["endAt"];
+
+			} // if ((isset($_GET["orderBy"])) && (isset($_GET["orderMode"])))
+			else
+			{
+				$startAt = null;
+				$endAt = null;
+			}
 						
 			$Obtener_tablas = explode("&",$separar_tablas[1]);
 			$tablas = $Obtener_tablas[0];
-
 			
 			//echo '<pre>';print_r($URL_separado); echo'</pre>';
 			//echo '<pre>';print_r($separar_tablas); echo'</pre>';
@@ -204,11 +214,98 @@ else // if (count($routesArray)==2)
 			//echo '<pre>';print_r($tablas); echo'</pre>';
 			//echo '<pre>';print_r($campos); echo'</pre>';
 			//exit;			
-			
+			$arreglo_parametros = array();
+			$arreglo_parametros['tabla'] = $tablas;
+			$arreglo_parametros['campo_tabla'] = $campos;
+			$arreglo_parametros['orderBy'] = $orderBy;
+			$arreglo_parametros['orderMode'] = $orderMode;
+			$arreglo_parametros['startAt'] = $startAt;
+			$arreglo_parametros['endAt'] = $endAt;
+
 			$response = new GetController();
-			$response->getRelData($tablas,$campos,$orderBy,$orderMode); 	//Lo ejecuta inmediatamente.
+			$response->getRelData($arreglo_parametros); 	//Lo ejecuta inmediatamente.
 
 		}
+			// ===================================================
+			// Petecion GET entre tablas Relacionadas CON Filtro.
+			// ===================================================
+			// explode("?",$routesArray[3])[0] = Es donde incluye la palabra "relations" (https://www..../MarketPlace/"relations"?rel=t_Products/...)
+		else if ((isset($_GET["rel"])) && (isset($_GET["type"])) && (explode("?",$routesArray[3])[0] == "relations")  && (isset($_GET["linkTo"])) && (isset($_GET["equalTo"])))
+		{
+			// Separando los componentes de la URL que teclea el usuario.
+			$URL_separado = explode("?",$routesArray[3]);
+			//echo '<pre>';print_r($URL_separado);echo'</pre>';
+			//echo 'Se esta ejecutando la condicion';
+			//exit;
+
+
+			$relations = $URL_separado[0];
+			$separar_tablas = explode("=",$URL_separado[1]);						
+			$Obtener_tablas = explode("&",$separar_tablas[1]);
+			$tablas = $Obtener_tablas[0];
+			
+			//echo '<pre>';print_r($URL_separado); echo'</pre>';
+			//echo '<pre>';print_r($separar_tablas); echo'</pre>';
+			//echo '<pre>';print_r($Obtener_tablas); echo'</pre>';
+			//echo '<pre>';print_r($relations); echo'</pre>';
+			//echo '<pre>';print_r($tablas); echo'</pre>';
+			//echo '<pre>';print_r($campos); echo'</pre>';
+			//exit;			
+
+			// Se verifica si vienen variables para Ordenar los registros.
+			if ((isset($_GET["orderBy"])) && (isset($_GET["orderMode"])))
+			{
+				$orderBy = $_GET["orderBy"];
+				$orderMode = $_GET["orderMode"];
+				$obtener_campos = explode("&",$separar_tablas[2]); 
+				$campos = $obtener_campos[0];
+			} // if ((isset($_GET["orderBy"])) && (isset($_GET["orderMode"])))
+			else
+			{
+				$orderBy = null;
+				$orderMode = null;
+				$obtener_campos = explode("&",$separar_tablas[2]); 
+				$campos = $obtener_campos[0];
+			}
+
+			// Se verifica si vienen variables para limitar los registros.
+			if ((isset($_GET["startAt"])) && (isset($_GET["endAt"])))
+			{
+				$startAt = $_GET["startAt"];
+				$endAt = $_GET["endAt"];
+				$obtener_campos = explode("&",$separar_tablas[2]); 
+				$campos = $obtener_campos[0];
+			} // if ((isset($_GET["orderBy"])) && (isset($_GET["orderMode"])))
+			else
+			{
+				$startAt = null;
+				$endAt = null;
+				$obtener_campos = explode("&",$separar_tablas[2]); 
+				$campos = $obtener_campos[0];
+			}
+
+			//echo '<pre>';print_r($startAt); echo'</pre>';
+			//echo '<pre>';print_r($endAt); echo'</pre>';
+			//echo '<pre>';print_r($campos); echo'</pre>';
+			//exit;			
+
+			$arreglo_parametros = array();
+			$arreglo_parametros['tabla'] = $tablas;
+			$arreglo_parametros['campo_tabla'] = $campos;			
+			$arreglo_parametros['orderBy'] = $orderBy;
+			$arreglo_parametros['orderMode'] = $orderMode;
+			$arreglo_parametros['linkTo'] = $_GET["linkTo"]; // El campo por el cual se filtrara.
+			$arreglo_parametros['equalTo'] = $_GET["equalTo"];
+			$arreglo_parametros['contenido_campo_teclado'] = $_GET["equalTo"];
+			$arreglo_parametros['campo_teclado'] = $_GET["linkTo"]; // El campo por el cual se filtrara.
+			$arreglo_parametros['startAt'] = $startAt;
+			$arreglo_parametros['endAt'] = $endAt;
+						
+
+			$response = new GetController();
+			$response->getRelFilterData($arreglo_parametros); 	//Lo ejecuta inmediatamente.
+
+		} // else if ((isset($_GET["rel"])) && (isset($_GET["type"])) && (explode("?",$routesArray[3])[0] == "relations")  && (!isset($_GET
 
 		// ===================================================
 		// Petecion GET Para el Buscador.
@@ -282,6 +379,7 @@ else // if (count($routesArray)==2)
 			
 		}
 
+		// Peticiones GET sin Filtro.
 		else // if ( (isset($_GET["linkTo"])) && (isset($_GET["equalTo"])) && (!isset($_GET["rel"])) && (!isset($_GET["type"])) )
 		{
 			// ===================================================
@@ -301,7 +399,6 @@ else // if (count($routesArray)==2)
 			{
 				$orderBy = $_GET["orderBy"];
 				$orderMode = $_GET["orderMode"];
-
 			} // if ((isset($_GET["orderBy"])) && (isset($_GET["orderMode"])))
 			else
 			{
@@ -309,8 +406,9 @@ else // if (count($routesArray)==2)
 				$orderMode = null;
 			}
 
-			// Preguntamos si no vienen variables de Limite.
-			
+			//echo '<pre>';print_r($orderBy);echo'</pre>';
+
+			// Preguntamos si no vienen variables de Limite.			
 			if ((isset($_GET["startAt"])) && (isset($_GET["endAt"])))
 			{
 				$startAt = $_GET["startAt"];
@@ -359,11 +457,11 @@ else // if (count($routesArray)==2)
 				//exit;
 				$arreglo_parametros['tabla'] = $tabla;
 
-				$response->getLimiteData($arreglo_parametros); 	//Lo ejecuta inmediatamente.				
+				$response->getOrderData($arreglo_parametros); 	//Lo ejecuta inmediatamente.				
 			}
 
-			
-			if (($startAt != null) && ($endAt != null))			
+			// Si solo viene el Limite para la consulta.
+			if (($startAt != null) && ($endAt != null) && ($orderBy == null) && ($orderMode == null))			
 			{
 				// Obtiene la tabla.
 				$URL_separado = explode("?",$routesArray[3]);				
@@ -372,17 +470,37 @@ else // if (count($routesArray)==2)
 				//echo"<pre>";print_r($URL_separado);echo"</pre>";
 				//echo"<pre>";print_r($tabla);echo"</pre>";
 				//exit;
-
-				$arreglo_parametros['tabla'] = $tabla;
-				
+				//$arreglo_parametros['tabla'] = $tabla;				
 				//echo '<pre>';print_r($tabla);echo'</pre>';
 				//echo '<pre>';print_r($orderBy);echo'</pre>';
 				//echo '<pre>';print_r($orderMode);echo'</pre>';
+				//echo '<pre>';print_r($arreglo_parametros['startAt']);echo'</pre>';
+				//echo '<pre>';print_r($arreglo_parametros['endAt']);echo'</pre>';				
+				//echo '<pre>';print_r($arreglo_parametros['tabla']);echo'</pre>';
 				//exit;
+				$arreglo_parametros['tabla'] = $tabla;
 
 				$response->getLimiteData($arreglo_parametros); 	//Lo ejecuta inmediatamente.
 			}
 
+			if (($startAt != null) && ($endAt != null) && ($orderBy != null) && ($orderMode != null))			
+			{
+				// Obtiene la tabla.
+				$URL_separado = explode("?",$routesArray[3]);				
+				$tabla = $URL_separado[0];
+			
+				//echo"<pre>";print_r($URL_separado);echo"</pre>";
+				//echo"<pre>";print_r($tabla);echo"</pre>";
+				//exit;
+				$arreglo_parametros['tabla'] = $tabla;				
+				//echo '<pre>';print_r($tabla);echo'</pre>';
+				//echo '<pre>';print_r($orderBy);echo'</pre>';
+				//echo '<pre>';print_r($orderMode);echo'</pre>';
+				//echo '<pre>';print_r($startAt);echo'</pre>';
+				//echo '<pre>';print_r($endAt);echo'</pre>';
+				//exit;
+				$response->getLimiteData($arreglo_parametros); 	//Lo ejecuta inmediatamente.
+			}
 
 		}
 

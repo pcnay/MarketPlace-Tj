@@ -58,27 +58,6 @@
 			//echo '<pre>';print_r($cadena);echo'</pre>';
 			//exit;
 
-/*
-			if (($orderBy != null) && ($orderMode != null)) 
-			{
-				// $stmt = Connection::connect()->prepare("SELECT * FROM $table ORDER BY $orderBy $orderMode");
-				$stmt = Connection::connect()->prepare($cadena);
-			}			
-			else
-			{
-				$stmt = Connection::connect()->prepare("SELECT * FROM $table");				
-			}
-			
-			if (($startAt != null) && ($endAt != null))
-			{
-				$stmt = Connection::connect()->prepare("SELECT * FROM $table ORDER BY $orderBy $orderMode LIMIT $startAt $endAt");
-			}			
-			else
-			{
-				$stmt = Connection::connect()->prepare("SELECT * FROM $table");				
-			}
-*/
-
 				// fetchAll = Retorna todas las filas
 				// PDO:FETCH_CLASS = Solo mostrara los nombre de columna con su contenido, no muestra los indices.
 
@@ -177,18 +156,31 @@
 				//$stmt = Connection::connect()->prepare("SELECT * FROM t_Categories INNER JOIN t_Products ON t_Categories.id_category = t_Products.id_category_product");
 				$orderBy = $arreglo_parametros['orderBy'];
 				$orderMode = $arreglo_parametros['orderMode'];
+				$startAt = $arreglo_parametros['startAt'];
+				$endAt = $arreglo_parametros['endAt'];
 
 				//echo '<pre>';print_r($orderBy);echo'</pre>';
 				//echo '<pre>';print_r($orderMode);echo'</pre>';
 				//exit;
 
-				if (($orderBy != null) && ($orderMode != null))
-				{
-					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b ORDER BY $orderBy $orderMode");
+				$cadena_SQL = "SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b";
+				
+				if (($orderBy != null) && ($orderMode != null) && ($startAt == null) && ($endAt == null))
+				{					
+					
+					$cadena_SQL = $cadena_SQL.' ORDER BY '.$orderBy.' '.$orderMode;
+					$stmt = Connection::connect()->prepare($cadena_SQL);
 				}
-				else
+
+				if (($orderBy == null) && ($orderMode == null) && ($startAt != null) && ($endAt != null))
 				{
-					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b");
+					$cadena_SQL = $cadena_SQL.' LIMIT '.$startAt.','.$endAt;
+					$stmt = Connection::connect()->prepare($cadena_SQL);
+				}
+
+				if (($orderBy == null) && ($orderMode == null) && ($startAt == null) && ($endAt == null))
+				{					
+					$stmt = Connection::connect()->prepare($cadena_SQL);
 				}
 
 
@@ -197,7 +189,13 @@
 			// Relaciones de tres tablas.
 			if ((count($relArray) == 3) && (count($typeArray)) == 3)
 			{
+
+				//$stmt = Connection::connect()->prepare("SELECT * FROM t_Categories INNER JOIN t_Subcategories ON t_Categories.id_category = t_Subcategories.id_category_subcategory INNER JOIN t_Products ON t_Categories.id_category = t_Products.id_category_product");
+
+
 				//https://www.miportalweb.org/curso-web/MarketPlace/relations?rel=t_Categories,t_Subcategories,t_Products&type=category,subcategory,product
+				
+
 
 				// $relArray[0] = t_Categories
 				// $relArray[1] = t_Subcategories
@@ -205,17 +203,29 @@
 				
 				// $typeArray[0] = category
 				// $typeArray[1] = subcategory
-				// $typeArray[2] = product 
-
+				// $typeArray[2] = product
+				
+				// https://www.miportalweb.org/curso-web/MarketPlace/relations?rel=t_Products,t_Orders,t_Messages&type=product,order,message
+				
+				// $relArray[0] = t_Products
+				// $relArray[1] = t_Orders
+				// $relArray[2] = t_Messages
+				
+				// $typeArray[0] = product
+				// $typeArray[1] = order
+				// $typeArray[2] = messages
+				
+				
 				//echo '<pre>';print_r($relArray);echo'</pre>';
 				//echo '<pre>';print_r($typeArray);echo'</pre>';
 				//exit;
-
-				//$stmt = Connection::connect()->prepare("SELECT * FROM t_Categories INNER JOIN t_Subcategories ON t_Categories.id_category = t_Subcategories.id_category_subcategory INNER JOIN t_Products ON t_Categories.id_category = t_Products.id_category_product");
-
+				
+				
 				// Se realiza la relacion de Padre a Hijo para la extraccion de datos.
 				// Estableciendo la relacion de las tablas.
-				$On1a = $relArray[0].'.id_'.$typeArray[1]."_".$typeArray[0]; //"t_Products.id_category_product"; 
+				$On1a = $relArray[0].'.id_'.$typeArray[1]."_".$typeArray[0]; // t_Products.id_order_product
+				
+				//"t_Products.id_category_product"; 
 				$On1b = $relArray[1].'.id_'.$typeArray[1]; //"t_Categories.id_category";
 				$On2a = $relArray[0].'.id_'.$typeArray[2]."_".$typeArray[0]; //"t_Products.id_subcategory_product";
 				$On2b = $relArray[2].'.id_'.$typeArray[2]; //"t_Subcategories.id_subcategory";
@@ -224,7 +234,7 @@
 				$orderMode = $arreglo_parametros['orderMode'];
 				if (($orderBy != null) && ($orderMode != null))
 				{
-					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b INNER JOIN $relArray[2] ON $On2a = $On2b ORDER BY $orderBy $oderMode");
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b INNER JOIN $relArray[2] ON $On2a = $On2b ORDER BY $orderBy $orderMode");
 				}
 				else
 				{
@@ -302,12 +312,18 @@
 			
 			$orderBy = $arreglo_parametros['orderBy'];
 			$orderMode = $arreglo_parametros['orderMode'];
+			$startAt = $arreglo_parametros['startAt'];
+			$endAt = $arreglo_parametros['endAt'];
 
+
+			//echo'<pre>';print_r($relArray);echo'</pre>';								
 			//echo'<pre>';print_r($typeArray);echo'</pre>';								
 			//echo'<pre>';print_r($linkTo);echo'</pre>';
 			//echo'<pre>';print_r($equalTo);echo'</pre>';
 			//echo'<pre>';print_r($orderBy);echo'</pre>';
-			//echo'<pre>';print_r($orderMode);echo'</pre>';
+			//echo'<pre>';print_r($orderMode);echo'</pre>';			
+			//echo'<pre>';print_r($startAt);echo'</pre>';
+			//echo'<pre>';print_r($endAt);echo'</pre>';
 			//exit;
 
 			// Cuando sean relaciones de 2 Tablas
@@ -321,6 +337,7 @@
 
 				//echo '<pre>';print_r($relArray);echo'</pre>';
 				//echo '<pre>';print_r($typeArray);echo'</pre>';
+				//echo '<pre>';print_r("2 Tablas Relacionadas");echo'</pre>';
 				//exit;
 
 				// Se realiza la relacion de Padre a Hijo para la extraccion de datos.
@@ -329,17 +346,51 @@
 				$On1b = $relArray[1].'.id_'.$typeArray[1]; //"t_Categories.id_category";
 
 				//$stmt = Connection::connect()->prepare("SELECT * FROM t_Categories INNER JOIN t_Products ON t_Categories.id_category = t_Products.id_category_product");
-				if (($orderBy != Null) && ($orderMode != Null))
+
+				////////////////////////////////////////////////////////
+				// Aplicar las validaciones para cuando sean "Limites"
+				//////////////////////////////////////////////////////
+
+				if (($orderBy != Null) && ($orderMode != Null) && ($startAt == Null) && ($endAt == Null))
 				{					 
 					 //echo "SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode";
 
 					//exit;
 					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode");
 				}
-				else
+
+				if (($orderBy == Null) && ($orderMode == Null) && ($startAt != Null) && ($endAt != Null))
+				{					 
+					 //echo "SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode";
+
+					//exit;
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b WHERE $linkTo = :$linkTo LIMIT $startAt,$endAt");
+				}
+
+				if (($orderBy != Null) && ($orderMode != Null) && ($startAt != Null) && ($endAt != Null))
+				{					 
+					 //echo "SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode";
+
+					//exit;
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode LIMIT $startAt,$endAt");
+				}
+
+
+				if (($orderBy == Null) && ($orderMode == Null) && ($startAt == Null) && ($endAt == Null))
 				{
 					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b WHERE $linkTo = :$linkTo");
 				}
+
+				if (($orderBy == Null) && ($orderMode == Null) && ($startAt != Null) && ($endAt != Null))
+				{
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b WHERE $linkTo = :$linkTo LIMIT $startAt,$endAt");
+				}
+				if (($orderBy != Null) && ($orderMode != Null) && ($startAt != Null) && ($endAt != Null))
+				{
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode LIMIT $startAt,$endAt");				
+				}
+
+
 				
 			} // if ((count($relArray) == 2) && (count($typeArray)) == 2)
 
@@ -369,14 +420,26 @@
 				$On2a = $relArray[0].'.id_'.$typeArray[2]."_".$typeArray[0]; //"t_Products.id_subcategory_product";
 				$On2b = $relArray[2].'.id_'.$typeArray[2]; //"t_Subcategories.id_subcategory";
 
-				if (($orderBy != Null) && ($orderMode != Null))
+				if (($orderBy == Null) && ($orderMode == Null) && ($startAt == Null) && ($endAt == Null))
+				{					 
+						$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b INNER JOIN $relArray[2] ON $On2a = $On2b WHERE $linkTo = :$linkTo");
+				}			
+
+				if (($orderBy == Null) && ($orderMode == Null) && ($startAt != Null) && ($endAt != Null))
+				{					 
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b INNER JOIN $relArray[2] ON $On2a = $On2b WHERE $linkTo = :$linkTo LIMIT $startAt,$endAt");
+				}
+
+				if (($orderBy != Null) && ($orderMode != Null) && ($startAt == Null) && ($endAt == Null))
 				{
 					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b INNER JOIN $relArray[2] ON $On2a = $On2b WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode");
 				}
-				else
-				{
-					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b INNER JOIN $relArray[2] ON $On2a = $On2b WHERE $linkTo = :$linkTo");
-				}			
+
+				if (($orderBy != Null) && ($orderMode != Null) && ($startAt != Null) && ($endAt != Null))
+				{					
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b INNER JOIN $relArray[2] ON $On2a = $On2b WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode LIMIT $startAt,$endAt");		
+					//echo"<pre>";print_r($stmt);echo"</pre>";
+				}
 				
 			}
 
@@ -411,11 +474,21 @@
 					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b INNER JOIN $relArray[2] ON $On2a = $On2b INNER JOIN $relArray[3] ON $On3a = $On3b WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode");			
 
 				}
-				else
+
+				if (($orderBy == Null) && ($orderMode == Null) && ($startAt == Null) && ($endAt == Null))
 				{
 					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b INNER JOIN $relArray[2] ON $On2a = $On2b INNER JOIN $relArray[3] ON $On3a = $On3b WHERE $linkTo = :$linkTo");			
 				}		
-				
+
+				if (($orderBy == Null) && ($orderMode == Null) && ($startAt != Null) && ($endAt != Null))
+				{
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b INNER JOIN $relArray[2] ON $On2a = $On2b INNER JOIN $relArray[3] ON $On3a = $On3b WHERE $linkTo = :$linkTo LIMIT $startAt,$endAt");								
+				}
+
+				if (($orderBy != Null) && ($orderMode != Null) && ($startAt != Null) && ($endAt != Null))
+				{
+					$stmt = Connection::connect()->prepare("SELECT * FROM $relArray[0] INNER JOIN $relArray[1] ON $On1a = $On1b INNER JOIN $relArray[2] ON $On2a = $On2b INNER JOIN $relArray[3] ON $On3a = $On3b WHERE $linkTo = :$linkTo ORDER BY $orderBy $orderMode LIMIT $startAt,$endAt");					
+				}				
 			}
 
 			$stmt->bindParam(":".$linkTo,$equalTo, PDO::PARAM_STR);	
